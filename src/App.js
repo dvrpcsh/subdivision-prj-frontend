@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './App.css';
 import LoginPage from './pages/LoginPage';
 import PotListPage from './pages/PotListPage';
+import LocationFinder from './components/LocationFinder';
 
 function App() {
     //2. 받아온 팟(Pot) 목록을 저장할 상태(state)를 만듭니다.
@@ -20,6 +21,11 @@ function App() {
     return (
         <div className="App">
             <header className="App-header">
+                <h1>Nottori 공동구매 플랫폼</h1>
+
+                <hr />
+                <LocationFinder />
+                <hr />
                 <h1>Nottori 팟 목록</h1>
                 {jwt ? (
                     //jwt가 있으면 PotListPage를 보여주고, 필요한 데이터(jwt)와 함수(handleLogout)를 넘겨줍니다.
