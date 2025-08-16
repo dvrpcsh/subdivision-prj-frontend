@@ -1,53 +1,87 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import KakaoMap from './KakaoMap';
 
-// 이 컴포넌트는 사용자의 현재 위치를 찾아 그 좌표를 화면에 표시하는 역할을 합니다.
 const LocationFinder = () => {
-    //사용자의 위치 정보를 저장할 state(latitude, longitude)
-    const [location, setLocation] = useState(null);
-    //오류 메시지를 저장할 state
-    const [error, setError] = useState('');
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState('');
+  const [pots, setPots] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    //컴포넌트가 처음 렌더링될 때 한 번만 실행됩니다.
-    useEffect(() => {
-        //Geolocation API가 브라우저에서 지원되는지 확인합니다.
-        if(!navigator.geolocation) {
-            setError('Geolocation is not supported by your browser.');
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setError('Geolocation is not supported by your browser.');
+      setLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
+  }, []);
 
-            return;
-        }
+  const handleSuccess = (position) => {
+    const { latitude, longitude } = position.coords;
+    setLocation({ latitude, longitude });
+    fetchNearbyPots(latitude, longitude);
+  };
 
-        //getCurrentPosition 메서드를 호출하여 사용자의 현재 위치를 요청합니다.
-        //이 함수는 성공 콜백과 실패 콜백, 두 개의 함수를 인자로 받습니다.
-        navigator.geolocation.getCurrentPosition(handleSuccess, handleError);
-    }, []); //빈 배열을 전달하여 최초 렌더링 시에만 실행되도록 합니다.
+  const handleError = (error) => {
+    setError(error.message);
+    setLoading(false);
+  };
 
-    //위치 정보 요청에 성공했을 때 실행될 콜백 함수입니다.
-    const handleSuccess = (position) => {
-        const { latitude, longitude } = position.coords;
-        //받아온 위도와 경도 값을 location state에 저장합니다.
-        setLocation({
-            latitude,
-            longitude
-        });
-    };
+  const fetchNearbyPots = async (latitude, longitude) => {
+    try {
+      const token = localStorage.getItem('jwt');
+      if (!token) {
+        setError('로그인이 필요합니다.');
+        setLoading(false);
+        return;
+      }
 
-    //위치 정보 요청에 실패했을 때 실행될 콜백 함수입니다.
-    const handleError = (error) => {
-        setError(error.message);
-    };
+      const response = await axios.get('http://localhost:8080/api/pots/nearby', {
+        params: { lat: latitude, lon: longitude, dist: 100 },
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
-    return (
-        <div>
-            <h2>내 위치 찾기</h2>
-            {location ? (
-                <p>
-                    위도 (Latitude): {location.latitude}, 경도 (Longitude): {location.longitude}
-                </p>
-            ) : (
-                <p>{error ? `오류: ${error}` : '위치를 찾는 중...'}</p>
-            )}
-        </div>
-    );
+      setPots(response.data || []);
+
+    } catch (err) {
+      setError('주변 팟 목록을 불러오는 데 실패했습니다.');
+      console.error('API Error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ width: '100%' }}>
+      <h2>내 위치 찾기</h2>
+      {location ? (
+        <p>위도: {location.latitude}, 경도: {location.longitude}</p>
+      ) : (
+        <p>{error ? `오류: ${error}` : '위치를 찾는 중...'}</p>
+      )}
+
+      {/* 지도 컨테이너를 고정 높이로 설정 */}
+      <div style={{ marginTop: '20px', marginBottom: '20px' }}>
+        <KakaoMap userLocation={location} pots={pots} />
+      </div>
+
+      <h2>주변 팟 목록 (총 {pots.length}개)</h2>
+      {loading ? (
+              <p>팟 목록을 불러오는 중...</p>
+            ) : pots.length > 0 ? (
+              <ul>
+                {pots.map((pot) => (
+                  <li key={pot.id}>
+                    <strong>{pot.title}</strong> - {pot.productName}
+                  </li>
+                ))}
+              </ul>
+      ) : (
+        <p>주변에 진행 중인 팟이 없습니다.</p>
+      )}
+    </div>
+  );
 };
 
 export default LocationFinder;

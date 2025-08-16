@@ -1,0 +1,6 @@
+.map-container {
+  width: 100%;
+  height: 400px;
+  display: block; /* 다른 display 속성(flex 등)과의 충돌 방지 */
+  margin: 20px 0; /* 위아래 여백 추가 */
+}
