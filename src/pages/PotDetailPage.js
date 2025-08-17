@@ -1,15 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const PotDetailPage = () => {
     //URL 경로의 파라미터(:potId)를 가져옵니다.
     const { potId } = useParams();
+    const navigate = useNavigate();
 
     //팟 상세 정보를 저장할 state
     const [pot, setPot] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    //이전 페이지로 이동
+    const handleGoBack = () => {
+        navigate(-1);
+    }
 
     //페이지가 열람될 때 한 번만 API를 호출합니다.
     useEffect(() => {
@@ -38,7 +44,15 @@ const PotDetailPage = () => {
 
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
-        <div style={{ padding: `20px` }}>
+        <div style={{ padding: '20px' }}>
+            {/* 뒤로가기 버튼 추가*/}
+            <button
+                onClick={handleGoBack}
+                style={{ marginBottom: '20px', padding: '8px 15px', cursor: 'pointer' }}
+            >
+                ← 뒤로가기
+            </button>
+
             <h1>{pot.title}</h1>
             <p><strong>작성자:</strong> {pot.authorNickname}</p>
             <hr />
