@@ -1,0 +1,17 @@
+.App-header {
+    background-color: #282c34;
+    min-height: 60px;
+    padding: 20px;
+    color: white;
+
+    /* Flexbox 레이아웃 적용 */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+}
+
+/* 네비게이션 링크 스타일 */
+.main-nav {
+    font-size: 16px;
+}
