@@ -72,7 +72,7 @@ const LocationFinder = () => {
             ) : pots.length > 0 ? (
               <ul>
                 {pots.map((pot) => (
-                  <li key={pot.id}>
+                  <li key={pot.potId}>
                     <strong>{pot.title}</strong> - {pot.productName}
                   </li>
                 ))}
