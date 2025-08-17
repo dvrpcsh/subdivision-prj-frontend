@@ -4,7 +4,7 @@ import './App.css';
 import LoginPage from './pages/LoginPage';
 import PotListPage from './pages/PotListPage';
 import LocationFinder from './components/LocationFinder';
-//import MainPage from './pages/MainPage';
+import MainPage from './pages/MainPage';
 import PotDetailPage from './pages/PotDetailPage';
 
 function App() {
@@ -51,26 +51,5 @@ function App() {
         </div>
     );
 }
-
-//MainPage 컴포넌트를 임시로 정의합니다. (기존 LocationFinder와 PotListPage를 합친 페이지)
-// 추후 별도 pages/Mainpage.js 파일로 분리할거임
-const MainPage = () => {
-    const handleLogout = () => {
-        localStorage.removeItem('jwt');
-        window.location.reload(); //간단하게 새로고침하여 App 컴포넌트의 jwt 상태를 갱신
-    };
-
-    return (
-        <div>
-            <button onClick={handleLogout} style={{ margin: '10px' }}>로그아웃</button>
-            <hr />
-            <LocationFinder />
-            <hr />
-            {/* PotListPage는 LocationFinder와 기능이 중복되므로 우선 제거합니다. */}
-            {/* <h1>Nottori 팟 목록</h1> */}
-            {/* <PotListPage jwt={localStorage.getItem('jwt')} onLogout={handleLogout} /> */}
-        </div>
-    );
-};
 
 export default App;
