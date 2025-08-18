@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage';
 import MainPage from './pages/MainPage';
 import PotDetailPage from './pages/PotDetailPage';
 import MyPage from './pages/MyPage';
+import PotCreatePage from './pages/PotCreatePage';
 
 function App() {
     const [jwt, setJwt] = useState(localStorage.getItem('jwt'));
@@ -37,6 +38,10 @@ function App() {
                     <Route
                         path="/mypage"
                         element={jwt ? <MyPage /> : <Navigate to="/login" />}
+                    />
+                    <Route
+                        path="/create-pot"
+                        element={jwt ? <PotCreatePage /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </main>

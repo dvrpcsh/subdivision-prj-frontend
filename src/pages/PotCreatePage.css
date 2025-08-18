@@ -1,0 +1,55 @@
+.create-pot-container {
+  max-width: 700px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+/* ✅ [수정] form-container를 pot-form으로 변경 */
+.pot-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 각 그룹 사이의 간격 */
+}
+
+/* ✅ [추가] 각 입력 그룹에 대한 스타일 */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  text-align: left; /* 라벨 텍스트를 왼쪽 정렬 */
+}
+
+/* ✅ [추가] 라벨 스타일 */
+.form-group label {
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+/* ✅ [수정] input, textarea 공통 스타일 */
+.form-group input,
+.form-group textarea {
+  padding: 12px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box; /* 패딩과 테두리를 너비에 포함시켜 레이아웃이 깨지지 않게 함 */
+}
+
+.form-group textarea {
+  min-height: 150px;
+  resize: vertical;
+}
+
+/* ... (나머지 CSS는 이전과 동일) ... */
+.preview-image {
+  max-width: 300px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.submit-button {
+  padding: 12px 20px;
+  font-size: 1.1rem;
+  /* ... */
+}

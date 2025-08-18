@@ -16,6 +16,9 @@ const Header = ({ jwt }) => {
           <Link to="/mypage" style={{ color: 'white', textDecoration: 'none' }}>
             마이페이지
           </Link>
+          <Link to="/create-pot" style={{ color: 'white', textDecoration: 'none', fontWeight: 'bold' }}>
+            팟 만들기
+          </Link>
         </nav>
       )}
     </header>

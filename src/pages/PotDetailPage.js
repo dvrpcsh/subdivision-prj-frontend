@@ -56,6 +56,13 @@ const PotDetailPage = () => {
             <h1>{pot.title}</h1>
             <p><strong>작성자:</strong> {pot.authorNickname}</p>
             <hr />
+
+            {/* 이미지 URL이 있을 경우에만 이미지를 표시합니다. */}
+            {pot.imageUrl && (
+                <div style={{ margin: '20px 0' }}>
+                    <img src={pot.imageUrl} alt={pot.productName} style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px' }} />
+                </div>
+            )}
             <h3>상품 정보</h3>
             <p><strong>상품명:</strong> {pot.productName}</p>
             <p><strong>내용: </strong> {pot.content}</p>

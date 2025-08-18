@@ -13,5 +13,16 @@
 
 /* 네비게이션 링크 스타일 */
 .main-nav {
+    display: flex;
+    align-items: center;
+    gap: 25px; /* 링크 사이의 간격을 25px로 설정 */
     font-size: 16px;
+}
+
+.main-nav align {
+    transition: opacity 0.2s; /* 부드러운 효과를 위한 transition */
+}
+
+.main-nav a:hover {
+    opacity: 0.8; /* 마우스를 올렸을 때 약간 투명하게 */
 }
