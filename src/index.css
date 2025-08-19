@@ -1,0 +1,19 @@
+/* 기본 스타일 초기화 */
+body, h1, h2, p, ul, li, button, input, textarea, select {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box; /* 모든 요소의 크기 계산을 테두리까지 포함하여 쉽게 만듭니다. */
+}
+
+/* 전체 앱에 적용될 기본 스타일 */
+body {
+  font-family: 'Noto Sans KR', sans-serif; /* 👈 1. 기본 폰트 적용 */
+  color: #343a40;                         /* 👈 2. 기본 텍스트 색상 적용 */
+  background-color: #F8F9FA;               /* 👈 3. 기본 배경 색상 적용 */
+}
+
+/* 링크 기본 스타일 수정 */
+a {
+  text-decoration: none; /* 밑줄 제거 */
+  color: inherit; /* 부모 요소의 색상을 상속받도록 설정 */
+}

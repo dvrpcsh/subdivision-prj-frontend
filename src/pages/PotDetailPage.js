@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import styles from './PotDetailPage.module.css';
 
 const PotDetailPage = () => {
     //URL 경로의 파라미터(:potId)를 가져옵니다.
@@ -44,39 +45,41 @@ const PotDetailPage = () => {
 
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
-        <div style={{ padding: '20px' }}>
-            {/* 뒤로가기 버튼 추가*/}
-            <button
-                onClick={handleGoBack}
-                style={{ marginBottom: '20px', padding: '8px 15px', cursor: 'pointer' }}
-            >
-                ← 뒤로가기
-            </button>
+        <div className={styles.pageContainer}>
+          <button onClick={() => navigate(-1)} className={styles.backButton}>
+            ← 목록으로 돌아가기
+          </button>
 
+          <div className={styles.potHeader}>
             <h1>{pot.title}</h1>
-            <p><strong>작성자:</strong> {pot.authorNickname}</p>
-            <hr />
+            <p className={styles.author}>작성자: {pot.authorNickname}</p>
+          </div>
 
-            {/* 이미지 URL이 있을 경우에만 이미지를 표시합니다. */}
-            {pot.imageUrl && (
-                <div style={{ margin: '20px 0' }}>
-                    <img src={pot.imageUrl} alt={pot.productName} style={{ maxWidth: '100%', maxHeight: '400px', borderRadius: '8px' }} />
-                </div>
-            )}
+          {pot.imageUrl && (
+            <div className={styles.imageContainer}>
+              <img src={pot.imageUrl} alt={pot.productName} className={styles.potImage} />
+            </div>
+          )}
+
+          <div className={styles.section}>
             <h3>상품 정보</h3>
             <p><strong>상품명:</strong> {pot.productName}</p>
-            <p><strong>내용: </strong> {pot.content}</p>
-            <hr />
+            {/* dangerouslySetInnerHTML을 사용하여 줄바꿈(\n)을 <br>로 렌더링 */}
+            <p><strong>내용:</strong> <span dangerouslySetInnerHTML={{ __html: pot.content.replace(/\n/g, '<br />') }} /></p>
+          </div>
+
+          <div className={styles.section}>
             <h3>참여 현황</h3>
             <p>{pot.currentHeadcount} / {pot.maximumHeadcount} 명</p>
             <h4>참여자 목록</h4>
-            <ul>
-                {pot.members.map((member, index) => (
-                    <li key={index}>{member.nickname}</li>
-                ))}
+            <ul className={styles.memberList}>
+              {pot.members.map((member, index) => (
+                <li key={index}>{member.nickname}</li>
+              ))}
             </ul>
+          </div>
         </div>
-    );
+  );
 };
 
 export default PotDetailPage;

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import KakaoMap from '../components/KakaoMap';
 import { PotCategory } from '../constants/categories';
+import { useNavigate } from 'react-router-dom';
+import styles from './MainPage.module.css';
 
 const MainPage = () => {
     const [location, setLocation] = useState(null);
@@ -11,6 +13,7 @@ const MainPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState(null);
     const [distance, setDistance] = useState(10);
+    const navigate = useNavigate();
 
     //로그아웃 핸들러
     const handleLogout = () => {
@@ -78,60 +81,64 @@ const MainPage = () => {
 
     return (
         <div>
-            <button
-                onClick={handleLogout}
-                style={{ margin: '10px', padding: '8px 15px', cursor: 'pointer' }}
-            >
+            <button onClick={handleLogout} style={{ position: 'absolute', top: 110, right: 20 }}>
                 로그아웃
             </button>
-            <hr />
 
-            {/* 검색 및 필터 UI*/}
-            <div className="search-filters">
-                <input
-                    type="text"
-                    placeholder="키워드로 검색"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                <div>
-                    {Object.entries(PotCategory).map(([key, displayName]) => (
-                        <button key={key} onClick={() => setCategory(key)}>
-                            {displayName}
-                        </button>
-                    ))}
-                    <button onClick={() => setCategory('null')}>전체</button>
+            <div className={styles.mainContainer}>
+            {/* 👈 1. 왼쪽 사이드바 */}
+            <div className={styles.sidebar}>
+                <h2>주변 팟 찾기</h2>
+                <div className={styles.filters}>
+                    <input
+                        type="text"
+                        placeholder="키워드로 검색..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <select value={distance} onChange={(e) => setDistance(e.target.value)}>
+                        <option value="1">1km 이내</option>
+                        <option value="3">3km 이내</option>
+                        <option value="5">5km 이내</option>
+                        <option value="10">10km 이내</option>
+                    </select>
+                    <div className={styles.categoryButtons}>
+                        <button className={!category ? styles.active : ''} onClick={() => setCategory(null)}>전체</button>
+                        {Object.entries(PotCategory).map(([key, displayName]) => (
+                            <button
+                                key={key}
+                                className={category === key ? styles.active : ''}
+                                onClick={() => setCategory(key)}
+                            >
+                                {displayName}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
-                <select value={distance} onChange={(e) => setDistance(e.target.value)}>
-                    <option value="1">1km 이내</option>
-                    <option value="3">3km 이내</option>
-                    <option value="5">5km 이내</option>
-                    <option value="10">10km 이내</option>
-                </select>
-            </div>
-
-            {/*지도와 팟 목록 표시*/}
-            <div style={{ marginTop: '20px', marginBottom: '20px' }}>
-                <KakaoMap userLocation={location} pots={pots} />
-            </div>
-
-            <h2>주변 팟 목록 (총 {pots.length}개)</h2>
+                {/* 👈 2. 팟 목록 (카드 디자인 적용) */}
                 {loading ? (
-                    <p>팟 목록을 불러오는 중...</p>
-                ) : pots.length > 0 ? (
-                    <ul>
+                    <p>목록을 불러오는 중...</p>
+                ) : (
+                    <ul className={styles.potList}>
                         {pots.map((pot) => (
-                            <li key={pot.potId}>
-                                <strong>{pot.title}</strong> - {pot.productName}
+                            <li key={pot.potId} className={styles.potCard} onClick={() => navigate(`/pots/${pot.potId}`)}>
+                                {pot.imageUrl && <img src={pot.imageUrl} alt={pot.productName} />}
+                                <h3>{pot.title}</h3>
+                                <p>{pot.productName}</p>
+                                <p>참여인원: {pot.currentHeadcount} / {pot.maximumHeadcount}</p>
                             </li>
                         ))}
                     </ul>
-                ) : (
-                    <p>주변에 진행 중인 팟이 없습니다.</p>
                 )}
             </div>
+
+            {/* 👈 3. 오른쪽 지도 영역 */}
+            <div className={styles.mapContent}>
+                <KakaoMap userLocation={location} pots={pots} />
+            </div>
+        </div>
+    </div>
     );
 };
 

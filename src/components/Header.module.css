@@ -1,0 +1,47 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    height: 80px;
+    background-color: #282c34;
+    color: white;
+}
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    gap: 30px; /* 링크 사이 간격 */
+}
+
+.navLink {
+    text-decoration: none;
+    color: #e0e0e0;
+    transition: color 0.2s;
+}
+
+.navLink:hover {
+    color: white;
+}
+
+.logoutButton {
+    padding: 8px 15px;
+    background-color: transparent;
+    color: #e0e0e0;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.logoutButton:hover {
+    background-color: white;
+    color: #282c34;
+}
