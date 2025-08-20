@@ -46,7 +46,7 @@ const PotDetailPage = () => {
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
         <div className={styles.pageContainer}>
-          <button onClick={() => navigate(-1)} className={styles.backButton}>
+          <button onClick={() => navigate('/')} className={styles.backButton}>
             ← 목록으로 돌아가기
           </button>
 

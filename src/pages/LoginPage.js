@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styles from './LoginPage.module.css';
 
 //부모 컴포넌트(App.js)로 부터 onLoginSuccess 함수를 props로 받습니다.
 const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
     const navigate = useNavigate();
 
     const handleLogin = async(e) => {
         e.preventDefault();
+        setError('');
+
         try {
             const response = await axios.post('http://localhost:8080/api/auth/login', {
                 email: email,
@@ -26,37 +30,39 @@ const LoginPage = () => {
 
             localStorage.setItem('jwt', receivedJwt);
 
-            navigate('/')
+            navigate('/');
             window.location.reload();
 
-
-
-        } catch(error) {
-            console.error("로그인 실패:", error);
-            alert("로그인에 실패했습니다.");
+        } catch(err) {
+            console.error("로그인 실패:", err);
+            setError("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
     };
 
     return (
-        <form onSubmit={handleLogin}>
-            <div>
+        <div className={styles.pageContainer}>
+            <h2>로그인</h2>
+            <form onSubmit={handleLogin} className={styles.loginForm}>
                 <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="이메일"
+                    required
+                    className={styles.formInput}
                 />
-            </div>
-            <div>
                 <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="비밀번호"
+                    required
+                    className={styles.formInput}
                 />
-            </div>
-            <button type="submit">로그인</button>
-        </form>
+                {error && <p className={styles.errorMessage}>{error}</p>}
+                <button type="submit" className={styles.submitButton}>로그인</button>
+            </form>
+        </div>
     );
 }
 
