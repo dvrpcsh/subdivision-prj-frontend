@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 //부모 컴포넌트(App.js)로 부터 onLoginSuccess 함수를 props로 받습니다.
-function LoginPage({ onLoginSuccess }) {
+const LoginPage = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
     const handleLogin = async(e) => {
         e.preventDefault();
@@ -14,9 +16,21 @@ function LoginPage({ onLoginSuccess }) {
                 password: password
             });
 
+            //응답 객체(response.data)에서 access Token만 정확히 추출
             const receivedJwt = response.data;
-            //로그인 성공 시, 부모에게 받은 함수를 호출하여 JWT를 전달합니다.
-            onLoginSuccess(receivedJwt);
+
+            //토큰 유효성 검사
+            if(!receivedJwt || typeof receivedJwt !== 'string') {
+                throw new Error('응답에 유효한 JWT가 없습니다.');
+            }
+
+            localStorage.setItem('jwt', receivedJwt);
+
+            navigate('/')
+            window.location.reload();
+
+
+
         } catch(error) {
             console.error("로그인 실패:", error);
             alert("로그인에 실패했습니다.");

@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useDaumPostcodePopup } from 'react-daum-postcode';
 import './PotCreatePage.css';
+import { PotCategory } from '../constants/categories';
+import LocationPicker from '../components/LocationPicker';
 
 const PotCreatePage = () => {
     const [title, setTitle] = useState('');
@@ -11,6 +14,15 @@ const PotCreatePage = () => {
     //이미지 파일과 미리보기 URL을 위한 state 추가
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
+    const [category, setCategory] = useState('FOOD');
+
+    //위치 및 주소찾기
+    const openPostcodePopup = useDaumPostcodePopup();
+
+    const [location, setLocation] = useState(null);
+    const [address, setAddress] = useState('');
+    const [detailAddress, setDetailAddress] = useState('');
+    const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
     const navigate = useNavigate();
 
     //이미지 파일 선택 시 실행 될 핸들러
@@ -26,6 +38,51 @@ const PotCreatePage = () => {
             reader.readAsDataURL(file);
         }
     };
+
+    //주소찾기 팝업을 열고 닫는 핸들러
+    const handleTogglePostcode = () => {
+        setIsPostcodeOpen(!isPostcodeOpen);
+    };
+
+    //'주소 검색' 버튼 클릭 시 실행될 핸들러
+    const handleAddressSearch = () => {
+        openPostcodePopup({ onComplete: handleCompletePostcode });
+    }
+
+    //주소찾기 완료 후 실행될 핸들러
+    const handleCompletePostcode = (data) => {
+        let fullAddress = data.address;
+        let extraAddress = '';
+
+        if(data.addressType === 'R') {
+            if(data.bname !== '') {
+                extraAddress += data.bname;
+            }
+            if(data.buildingName !== '') {
+                extraAddress += (extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName);
+            }
+            fullAddress += (extraAddress !== '' ? ` (${extraAddress})` : '');
+        }
+
+        setAddress(fullAddress); //주소 state 업데이트
+
+        //주소를 좌표로 변환
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.addressSearch(fullAddress, (result, status) => {
+            if(status === window.kakao.maps.services.Status.OK) {
+                const newCoords = { lat: parseFloat(result[0].y), lng: parseFloat(result[0].x)};
+                setLocation(newCoords); //좌표 state 업데이트
+            }
+        });
+
+        setIsPostcodeOpen(false); //팝업 닫기
+        }
+
+        //지도를 클릭했을 때 실행될 핸들러
+        const handleLocationSelect = (selectedLocation) => {
+            setLocation(selectedLocation);
+            //(선택) 좌표를 주소로 변환하여 주소창에 표시할 수도 있습니다.
+        };
 
     //폼 제출 시 실행 될 핸들러
     const handleSubmit = async (e) => {
@@ -63,9 +120,10 @@ const PotCreatePage = () => {
                 productName,
                 maximumHeadcount: parseInt(maximumHeadcount, 10),
                 imageUrl,
-                //위치 정보는 실제 앱에서는 Geolocation으로 받아와야 합니다. 여기서는 임시로 사용
-                latitude: 35.179554,
-                longitude: 129.075642
+
+                latitude: location.lat,
+                longitude: location.lng,
+                category: category
             };
 
             const response = await axios.post('http://localhost:8080/api/pots', potData, {
@@ -100,6 +158,37 @@ const PotCreatePage = () => {
                 <div className="form-group">
                     <label htmlFor="content">내용</label>
                     <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} required />
+                </div>
+
+                {/* 카테고리 선택 드롭다운 */}
+                <div className="form-group">
+                    <label htmlFor="category">카테고리</label>
+                    <select
+                        id="category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        required
+                    >
+                        {Object.entries(PotCategory).map(([key, displayName]) => (
+                            <option key={key} value={key}>
+                                {displayName}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                /* 주소 관련 UI */
+                <div className="form-group">
+                    <label>팟 생성 위치</label>
+                    <button type="button" onClick={handleAddressSearch}>주소 검색</button>
+                    <input type="text" value={address} placeholder="주소" readOnly />
+                    <input type="text" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} placeholder="상세주소 입력" />
+                </div>
+
+                {/*위치 선택 지도*/}
+                <div className="form-group">
+                    <p style={{fontSize: '14px', color: '#666'}}>또는 지도에서 직접 위치를 클릭하세요.</p>
+                    <LocationPicker onLocationSelect={handleLocationSelect} selectedLocation={location} />
                 </div>
 
                 <div className="form-group">
