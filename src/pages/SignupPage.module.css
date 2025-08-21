@@ -9,6 +9,24 @@
   background-color: #fff;
 }
 
+.passwordMessage {
+  font-size: 0.8rem;
+  text-align: left;
+  margin-top: -10px;
+  margin-bottom: -5px;
+  font-weight: 500;
+}
+
+.validMessage {
+  composes: passwordMessage; /* passwordMessage 스타일 상속 */
+  color: #28a745;
+}
+
+.invalidMessage {
+  composes: passwordMessage; /* passwordMessage 스타일 상속 */
+  color: #ff6b6b;
+}
+
 .signupForm {
   display: flex;
   flex-direction: column;

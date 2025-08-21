@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignupPage.module.css';
@@ -9,13 +9,41 @@ const SignupPage = () => {
     const [passwordConfirm, setPasswordConfirm] = useState('');
     const [nickname, setNickname] = useState('');
     const [error, setError] = useState('');
+
+    //비밀번호 유효성 검사 메시지와 상태를 위한 state 추가
+    const [passwordMessage, setPasswordMessage] = useState('');
+    const [isPasswordValid, setIsPasswordValid] = useState(false);
+
     const navigate = useNavigate();
+
+    //password state가 변경될 때 마다 실행되는 useEffect
+    useEffect(() => {
+        if(password) {
+            const specialCharRegex = /[!@#$%^&*(),.?":{}|<>]/;
+            if(password.length < 6 || password.length > 30) {
+                setPasswordMessage('비밀번호는 6자 이상 30자 이하로 입력해주세요.');
+                setIsPasswordValid(false);
+            } else if(!specialCharRegex.test(password)) {
+                setPasswordMessage('비밀번호에 특수문자를 하나 이상 포함해야 합니다.');
+                setIsPasswordValid(false);
+            } else {
+                setPasswordMessage('사용 가능한 비밀번호입니다.');
+                setIsPasswordValid(true);
+            }
+        } else {
+            setPasswordMessage('');
+        }
+    }, [password]); //password 값이 바뀔 때 마다 이 함수가 재실행됩니다.
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
 
         //1.비밀번호 확인
+        if (!isPasswordValid) {
+            setError('비밀번호가 유효하지 않습니다.');
+            return;
+        }
         if(password !== passwordConfirm) {
             setError('비밀번호가 일치하지 않습니다.');
 
@@ -91,6 +119,12 @@ const SignupPage = () => {
                     required
                     className={styles.formInput}
                 />
+                {/*유효성 검사 메시지를 동적으로 표시*/}
+                {passwordMessage && (
+                    <p className={isPasswordValid ? styles.validMessage : styles.invalidMessage}>
+                        {passwordMessage}
+                    </p>
+                )}
                 <input
                     type="password"
                     placeholder="비밀번호 확인"
