@@ -10,6 +10,13 @@ const SignupPage = () => {
     const [nickname, setNickname] = useState('');
     const [error, setError] = useState('');
 
+    //이메일 인증 절차를 위한 state 추가
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isCodeSent, setIsCodeSent] = useState(false);
+    const [isVerified, setIsVerified] = useState(false);
+    const [verificationMessage, setVerificationMessage] = useState('');
+    const [isSending, setIsSending] = useState(false);
+
     //비밀번호 유효성 검사 메시지와 상태를 위한 state 추가
     const [passwordMessage, setPasswordMessage] = useState('');
     const [isPasswordValid, setIsPasswordValid] = useState(false);
@@ -99,50 +106,127 @@ const SignupPage = () => {
         }
     };
 
+    //인증번호 전송 버튼 클릭 시 실행될 함수
+    const handleSendCode = async () => {
+        if(!email) {
+            setError('이메일을 먼저 입력해주세요.');
+
+            return;
+        }
+        setIsSending(true);
+        setError('');
+
+        try {
+            await axios.post('http://localhost:8080/api/auth/send-verification-code', {email});
+            setIsCodeSent(true); //로딩 시작
+            setVerificationMessage('인증번호가 발송되었습니다. 메일을 확인해주세요.');
+        } catch(err) {
+            setError('인증번호 발송에 실패했습니다. 이메일을 확인해주세요.');
+        } finally {
+            setIsSending(false); //로딩 종료
+        }
+    };
+
+    //인증번호 확인 버튼 클릭 시 실행될 함수
+    const handleVerifyCode = async () => {
+        try {
+            await axios.post('http://localhost:8080/api/auth/verify-code', { email, code:verificationCode });
+            setIsVerified(true);
+            setVerificationMessage('인증이 완료되었습니다.');
+            setError('');
+        } catch(err) {
+            setError('인증번호가 올바르지 않습니다.');
+        }
+    };
+
     return (
         <div className={styles.pageContainer}>
             <h2>회원가입</h2>
             <form onSubmit={handleSubmit} className={styles.signupForm}>
-                <input
-                    type="email"
-                    placeholder="이메일"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    className={styles.formInput}
-                />
-                <input
-                    type="password"
-                    placeholder="비밀번호"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className={styles.formInput}
-                />
-                {/*유효성 검사 메시지를 동적으로 표시*/}
-                {passwordMessage && (
-                    <p className={isPasswordValid ? styles.validMessage : styles.invalidMessage}>
-                        {passwordMessage}
+                {/* 이메일 인증 UI Group */}
+                <div className={styles.formGroup}>
+                    <label>이메일</label>
+                    <div className={styles.inputWithButton}>
+                        <input
+                            type="email"
+                            placeholder="이메일"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className={styles.formInput}
+                            disabled={isVerified || isCodeSent} // 인증 시작 후 수정 불가
+                        />
+                        <button type="button" onClick={handleSendCode} disabled={isSending || isCodeSent} className={styles.actionButton}>
+                            {isSending ? '전송 중...' : '인증번호 전송'}
+                        </button>
+                    </div>
+                </div>
+
+                {/* 인증번호 전송 후 입력창 및 메시지 표시 */}
+                {isCodeSent && !isVerified && (
+                    <div className={styles.formGroup}>
+                        <label>인증번호</label>
+                        <div className={styles.inputWithButton}>
+                            <input
+                                type="text"
+                                placeholder="인증번호 6자리 입력"
+                                value={verificationCode}
+                                onChange={(e) => setVerificationCode(e.target.value)}
+                                className={styles.formInput}
+                            />
+                            <button type="button" onClick={handleVerifyCode} className={styles.actionButton}>
+                                인증번호 확인
+                            </button>
+                        </div>
+                    </div>
+                )}
+                {verificationMessage && (
+                    <p className={isVerified ? styles.verifiedMessage : styles.verificationRequestedMessage}>
+                        {verificationMessage}
                     </p>
                 )}
-                <input
-                    type="password"
-                    placeholder="비밀번호 확인"
-                    value={passwordConfirm}
-                    onChange={(e) => setPasswordConfirm(e.target.value)}
-                    required
-                    className={styles.formInput}
-                />
-                <input
-                    type="text"
-                    placeholder="닉네임"
-                    value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
-                    required
-                    className={styles.formInput}
-                />
+                <div className={styles.formGroup}>
+                    <label>비밀번호</label>
+                        <input
+                            type="password"
+                            placeholder="비밀번호"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className={styles.formInput}
+                        />
+                        {/*유효성 검사 메시지를 동적으로 표시*/}
+                        {passwordMessage && (
+                            <p className={isPasswordValid ? styles.validMessage : styles.invalidMessage}>
+                                {passwordMessage}
+                            </p>
+                        )}
+                </div>
+                <div className={styles.formGroup}>
+                    <label>비밀번호 확인</label>
+                    <input
+                        type="password"
+                        placeholder="비밀번호 확인"
+                        value={passwordConfirm}
+                        onChange={(e) => setPasswordConfirm(e.target.value)}
+                        required
+                        className={styles.formInput}
+                    />
+                </div>
+                <div className={styles.formGroup}>
+                    <label>닉네임</label>
+                    <input
+                        type="text"
+                        placeholder="닉네임"
+                        value={nickname}
+                        onChange={(e) => setNickname(e.target.value)}
+                        required
+                        className={styles.formInput}
+                    />
+                </div>
+
                 {error && <p className={styles.errorMessage}>{error}</p>}
-                <button type="submit" className={styles.submitButton}>가입하기</button>
+                <button type="submit" disabled={!isVerified} className={styles.submitButton}>가입하기</button>
             </form>
         </div>
     );
