@@ -9,6 +9,7 @@ import PotDetailPage from './pages/PotDetailPage';
 import MyPage from './pages/MyPage';
 import PotCreatePage from './pages/PotCreatePage';
 import SignupPage from './pages/SignupPage';
+import OAuth2RedirectPage from './pages/OAuth2RedirectPage';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
                     <Route path="/mypage" element={<MyPage />} />
                     <Route path="/create-pot" element={<PotCreatePage />} />
                     {/* 인증이 필요한 페이지는 각 페이지 내부에서 처리하는 것이 더 효율적일 수 있습니다. */}
+                    <Route path="/oauth2/redirect" element={<OAuth2RedirectPage />} />
                 </Routes>
             </main>
         </div>

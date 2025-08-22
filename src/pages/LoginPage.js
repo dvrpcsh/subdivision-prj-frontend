@@ -62,8 +62,17 @@ const LoginPage = () => {
                 {error && <p className={styles.errorMessage}>{error}</p>}
                 <button type="submit" className={styles.submitButton}>로그인</button>
             </form>
+
+            <div style={{ marginTop: '20px' }}>
+                {/* Google 로그인 버튼 */}
+                <a
+                    href="http://localhost:8080/oauth2/authorization/google"
+                    className={styles.googleButton}
+                > Google 계정으로 로그인
+                </a>
+            </div>
         </div>
     );
-}
+};
 
 export default LoginPage;
