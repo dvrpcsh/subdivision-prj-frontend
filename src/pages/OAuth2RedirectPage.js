@@ -10,8 +10,14 @@ const OAuth2RedirectPage = () => {
         const token = searchParams.get('token');
 
         if(token) {
+            //토큰이 존재하면 localStorage에 저장합니다.
+            localStorage.setItem('jwt', token);
+
             //토큰이 없으면 로그인 페이지로 돌려보냅니다.
-            alert('로그인에 실패했습니다.');
+            window.location.replace('/');
+        } else {
+            //토큰이 없으면 로그인 실패 처리
+            alert('로그인에 실패했습니다. (토큰 없음)');
             navigate('/login');
         }
     }, [searchParams, navigate]);
