@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './PotDetailPage.module.css';
+import { AuthContext } from '../context/AuthContext';
 
 const PotDetailPage = () => {
     //URL 경로의 파라미터(:potId)를 가져옵니다.
@@ -12,6 +13,9 @@ const PotDetailPage = () => {
     const [pot, setPot] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    //Context에서 현재 사용자 정보 가져오기
+    const { currentUser } = useContext(AuthContext);
 
     //이전 페이지로 이동
     const handleGoBack = () => {
@@ -38,6 +42,26 @@ const PotDetailPage = () => {
         fetchPotDetails();
     }, [potId]); //potId가 변경될 때 마다 다시 호출합니다.
 
+    // 삭제 버튼 핸들러
+    const handleDelete = async () => {
+        if (window.confirm('정말로 이 팟을 삭제하시겠습니까?')) {
+            try {
+                const token = localStorage.getItem('jwt');
+                await axios.delete(`http://localhost:8080/api/pots/${potId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                alert('팟이 삭제되었습니다.');
+                navigate('/'); // 메인 페이지로 이동
+            } catch (err) {
+                alert('삭제에 실패했습니다.');
+                console.error(err);
+            }
+        }
+    };
+
+    //현재 사용자가 작성자인지 확인
+    const isAuthor = currentUser && pot && currentUser.nickname === pot.authorNickname;
+
     //로딩 및 에러 상태에 따른 UI 표시
     if(loading) return <div>로딩 중...</div>;
     if(error) return <div>{error}</div>;
@@ -53,6 +77,14 @@ const PotDetailPage = () => {
           <div className={styles.potHeader}>
             <h1>{pot.title}</h1>
             <p className={styles.author}>작성자: {pot.authorNickname}</p>
+
+            {/* 작성자일 경우에만 수정/삭제 버튼을 보여줌 */}
+            {isAuthor && (
+                <div className={styles.buttonGroup}>
+                    <button className={styles.editButton}>수정</button>
+                    <button onClick={handleDelete} className={styles.deleteButton}>삭제</button>
+                </div>
+            )}
           </div>
 
           {pot.imageUrl && (
