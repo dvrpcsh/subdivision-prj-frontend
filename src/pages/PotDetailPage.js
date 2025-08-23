@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './PotDetailPage.module.css';
@@ -42,7 +42,7 @@ const PotDetailPage = () => {
         fetchPotDetails();
     }, [potId]); //potId가 변경될 때 마다 다시 호출합니다.
 
-    // 삭제 버튼 핸들러
+    //삭제 버튼 핸들러
     const handleDelete = async () => {
         if (window.confirm('정말로 이 팟을 삭제하시겠습니까?')) {
             try {
@@ -58,6 +58,12 @@ const PotDetailPage = () => {
             }
         }
     };
+
+    //수정 버튼 핸들러
+    const handleEdit = () => {
+        //수정 페이지 경로로 이동합니다.
+        navigate(`/pots/${potId}/edit`)
+    }
 
     //현재 사용자가 작성자인지 확인
     const isAuthor = currentUser && pot && currentUser.nickname === pot.authorNickname;
@@ -81,7 +87,7 @@ const PotDetailPage = () => {
             {/* 작성자일 경우에만 수정/삭제 버튼을 보여줌 */}
             {isAuthor && (
                 <div className={styles.buttonGroup}>
-                    <button className={styles.editButton}>수정</button>
+                    <button onClick={handleEdit} className={styles.editButton}>수정</button>
                     <button onClick={handleDelete} className={styles.deleteButton}>삭제</button>
                 </div>
             )}

@@ -76,13 +76,13 @@ const PotCreatePage = () => {
         });
 
         setIsPostcodeOpen(false); //팝업 닫기
-        }
+    }
 
-        //지도를 클릭했을 때 실행될 핸들러
-        const handleLocationSelect = (selectedLocation) => {
-            setLocation(selectedLocation);
-            //(선택) 좌표를 주소로 변환하여 주소창에 표시할 수도 있습니다.
-        };
+    //지도를 클릭했을 때 실행될 핸들러
+    const handleLocationSelect = (selectedLocation) => {
+        setLocation(selectedLocation);
+        //(선택) 좌표를 주소로 변환하여 주소창에 표시할 수도 있습니다.
+    };
 
     //폼 제출 시 실행 될 핸들러
     const handleSubmit = async (e) => {
