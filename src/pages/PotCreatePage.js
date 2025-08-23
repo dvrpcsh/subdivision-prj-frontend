@@ -87,6 +87,14 @@ const PotCreatePage = () => {
     //폼 제출 시 실행 될 핸들러
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        //주소가 입력되었는지 유효성 검사
+        if(!location) {
+            alert('주소를 입력해주세요.');
+
+            return;
+        }
+
         let imageUrl = '';
 
         //이미지가 선택되었으면 S3에 먼저 업로드
