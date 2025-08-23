@@ -76,6 +76,10 @@ const LoginPage = () => {
                     className={`${styles.socialButton} ${styles.kakaoButton}`}
                 > 카카오 계정으로 로그인
                 </a>
+                {/* 네이버 로그인 버튼 */}
+                <a href="http://localhost:8080/oauth2/authorization/naver" className={`${styles.socialButton} ${styles.naverButton}`}>
+                    네이버 계정으로 로그인
+                </a>
             </div>
         </div>
     );

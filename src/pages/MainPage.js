@@ -18,11 +18,12 @@ const MainPage = () => {
     //로그아웃 핸들러
     const handleLogout = () => {
         localStorage.removeItem('jwt');
-        window.location.replace('/login');
+        navigate('/login');
     };
 
     //컴포넌트가 처음 마운트될 때 사용자의 위치를 가져오는 useEffect
     useEffect(() => {
+
         if(!navigator.geolocation) {
             setError('Geolocation is not supported by your browser');
             setLoading(false);
@@ -67,9 +68,11 @@ const MainPage = () => {
                     },
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                setPots(response.data.content);
+                //응답 데이터가 없거나 content가 없을 경우를 대비해 기본값으로 빈 배열을 설정
+                setPots(response.data?.content || []);
             } catch(err) {
                 setError('주변 팟 목록을 불러오는 데 실패했습니다.');
+                setPots([]); //에러 발생 시에도 빈 배열로 초기화
                 console.error('API Error:', err);
             } finally {
                 setLoading(false); //데이터 요청 완료 시 로딩 상태 해제

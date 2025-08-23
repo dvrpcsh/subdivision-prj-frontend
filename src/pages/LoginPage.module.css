@@ -59,6 +59,13 @@
   border: none;
 }
 
+/* 네이버 로그인 버튼 스타일 */
+.naverButton {
+  color: white;
+  background-color: #03C75A;
+  border: none;
+}
+
 .googleButton:hover {
     background-color: #f5f5f5;
 }

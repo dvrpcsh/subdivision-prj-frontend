@@ -14,7 +14,8 @@ const OAuth2RedirectPage = () => {
             localStorage.setItem('jwt', token);
 
             //토큰이 없으면 로그인 페이지로 돌려보냅니다.
-            window.location.replace('/');
+            navigate('/');
+            window.location.reload();
         } else {
             //토큰이 없으면 로그인 실패 처리
             alert('로그인에 실패했습니다. (토큰 없음)');
