@@ -40,6 +40,10 @@ const PotEditPage = () => {
 
                 setPotData(response.data);
                 setPreviewUrl(response.data.imageUrl); // 기존 이미지 미리보기 설정
+
+                //불러온 데이터로 주소 state를 설정합니다.
+                setAddress(response.data.address || '');
+                setDetailAddress(response.data.detailAddress || '');
             } catch(error) {
                 console.error("게시물 정보를 불러오는데 실패했습니다.", error);
                 alert("게시물 정보를 불러올 수 없습니다.");
@@ -121,6 +125,8 @@ const PotEditPage = () => {
                 ...potData,
                 imageUrl: finalImageUrl,
                 maximumHeadcount: parseInt(potData.maximumHeadcount, 10),
+                address: address,
+                detailAddress: detailAddress
             };
             await axios.put(`http://localhost:8080/api/pots/${potId}`, dataToSubmit, {
                 headers: { 'Authorization': `Bearer ${token}` }
@@ -166,8 +172,18 @@ const PotEditPage = () => {
                 <div className="form-group">
                     <label>팟 위치</label>
                     <button type="button" onClick={handleAddressSearch}>주소 검색</button>
-                    <input type="text" value={address || '주소 검색 또는 지도를 클릭하세요'} readOnly />
-                    {/* 상세 주소는 수정 시에는 의미가 없으므로 제거하거나 필요에 따라 추가 */}
+                    <input
+                        type="text"
+                        value={address}
+                        placeholder="주소"
+                        readOnly
+                    />
+                    <input
+                        type="text"
+                        value={detailAddress}
+                        onChange={(e) => setDetailAddress(e.target.value)}
+                        placeholder="상세주소 입력"
+                    />
                 </div>
                 {/* 위치 선택 */}
                 <div className="form-group">

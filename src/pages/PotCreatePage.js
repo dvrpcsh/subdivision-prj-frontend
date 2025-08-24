@@ -131,7 +131,9 @@ const PotCreatePage = () => {
 
                 latitude: location.lat,
                 longitude: location.lng,
-                category: category
+                category: category,
+                address: address,
+                detailAddress: detailAddress
             };
 
             const response = await axios.post('http://localhost:8080/api/pots', potData, {
