@@ -83,12 +83,15 @@ const MyPage = () => {
                 { nickname: newNickname },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );
+
             alert('닉네임이 성공적으로 변경되었습니다.');
+
             //현재 사용자 정보를 즉시 업데이트합니다.
             setCurrentUser(prevUser => ({
                 ...prevUser,
                 nickname: newNickname
             }));
+
             // 입력창을 비웁니다.
             setNewNickname('');
         } catch (err) {
