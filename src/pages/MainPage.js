@@ -13,12 +13,19 @@ const MainPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState(null);
     const [distance, setDistance] = useState(10);
+    const [status, setStatus] = useState('RECRUITING');
     const navigate = useNavigate();
 
     //로그아웃 핸들러
     const handleLogout = () => {
         localStorage.removeItem('jwt');
         navigate('/login');
+    };
+
+    //토글 스위치 상태 변경 핸들러
+    const handleStatusToggle = (e) => {
+        // 체크되면 'RECRUITING', 해제되면 null (전체 보기)로 상태 변경
+        setStatus(e.target.checked ? 'RECRUITING' : null);
     };
 
     //컴포넌트가 처음 마운트될 때 사용자의 위치를 가져오는 useEffect
@@ -49,6 +56,7 @@ const MainPage = () => {
         if(!location) return;
 
         const fetchPots = async () => {
+            if (!location) return;
             setLoading(true); //데이터 요청 시작 시 로딩 상태로 설정
             try {
                 const token = localStorage.getItem('jwt');
@@ -64,7 +72,7 @@ const MainPage = () => {
                         distance: distance,
                         keyword: searchTerm || null, //검색어가 비어있으면 null로 보냄
                         category: category,
-                        status: 'RECRUITING'
+                        status: status
                     },
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -80,7 +88,7 @@ const MainPage = () => {
         };
 
         fetchPots();
-    }, [location, searchTerm, category, distance]); //해당 값들이 바뀔 때 마다 useEffect 실행
+    }, [location, searchTerm, category, distance, status]); //해당 값들이 바뀔 때 마다 useEffect 실행
 
     return (
         <div>
@@ -89,7 +97,7 @@ const MainPage = () => {
             </button>
 
             <div className={styles.mainContainer}>
-            {/* 👈 1. 왼쪽 사이드바 */}
+            {/* 1. 왼쪽 사이드바 */}
             <div className={styles.sidebar}>
                 <h2>주변 팟 찾기</h2>
                 <div className={styles.filters}>
@@ -119,7 +127,22 @@ const MainPage = () => {
                     </div>
                 </div>
 
-                {/* 👈 2. 팟 목록 (카드 디자인 적용) */}
+                {/* 상태 필터 버튼 */}
+                <div className={styles.statusFilters}>
+                    <div className={styles.toggleContainer}>
+                        <label className={styles.toggleSwitch}>
+                            <input
+                                type="checkbox"
+                                checked={status === 'RECRUITING'}
+                                onChange={handleStatusToggle}
+                            />
+                            <span className={styles.toggleSlider}></span>
+                        </label>
+                        <span>모집중인 팟만 보기</span>
+                    </div>
+                </div>
+
+                {/* 2. 팟 목록 (카드 디자인 적용) */}
                 {loading ? (
                     <p>목록을 불러오는 중...</p>
                 ) : (
@@ -136,7 +159,7 @@ const MainPage = () => {
                 )}
             </div>
 
-            {/* 👈 3. 오른쪽 지도 영역 */}
+            {/* 3. 오른쪽 지도 영역 */}
             <div className={styles.mapContent}>
                 <KakaoMap userLocation={location} pots={pots} />
             </div>
