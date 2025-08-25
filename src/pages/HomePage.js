@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import PotCard from '../components/PotCard';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import styles from './HomePage.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -20,6 +21,14 @@ const HomePage = () => {
     const [status, setStatus] = useState(null);
 
     const navigate = useNavigate();
+    const { currentUser } = useContext(AuthContext);
+
+    // 로그인된 사용자가 HomePage에 접근하면 자동으로 MapPage로 리디렉션
+    useEffect(() => {
+        if (currentUser) {
+            navigate('/map', { replace: true });
+        }
+    }, [currentUser, navigate]);
 
     //'우리 동네 팟 찾기' 버튼 클릭 핸들러
     const handleCtaClick = () => {
@@ -33,10 +42,12 @@ const HomePage = () => {
     };
 
     useEffect(() => {
+        // 로그인된 사용자는 이 페이지를 볼 수 없으므로 API 호출하지 않음
+        if (currentUser) return;
+
         const fetchPots = async () => {
             setLoading(true);
             try {
-                //API 호출을 /api/pots/search 엔드포인트로 변경
                 const params = {
                     lat: 35.179554,
                     lon: 129.075642,
@@ -61,7 +72,7 @@ const HomePage = () => {
             setLoading(false);
         };
         fetchPots();
-    }, [page, searchTerm, category, status]); //page가 변경될 때 마다 데이터를 다시 불러옵니다.
+    }, [page, searchTerm, category, status, currentUser]);
 
     //로딩 및 에러 상태에 따라 다른 UI를 보여주는 함수
     const renderContent = () => {

@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import KakaoMap from '../components/KakaoMap';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import styles from './MapPage.module.css';
 
 const MapPage = () => {
@@ -16,6 +17,7 @@ const MapPage = () => {
     const [status, setStatus] = useState('RECRUITING');
     const [map, setMap] = useState();//지도 인스턴스를 저장할 상태. 이 상태를 자식 컴포넌트(KakaoMap)와 공유합니다.
     const navigate = useNavigate();
+    const { logout } = useContext(AuthContext);
 
 
     /**
@@ -31,7 +33,7 @@ const MapPage = () => {
             // 2. 검색 반경(distance)에 따라 지도 확대 레벨(level)을 설정합니다.
             let level;
             if (distance <= 1) level = 2;
-            else if (distance <= 3) level = 2;
+            else if (distance <= 3) level = 3;
             else if (distance <= 5) level = 3;
             else if (distance <= 10) level = 5;
             else if (distance <= 20) level = 6;
@@ -43,8 +45,8 @@ const MapPage = () => {
 
     //로그아웃 핸들러
     const handleLogout = () => {
-        localStorage.removeItem('jwt');
-        navigate('/login');
+        logout();
+        navigate('/');
     };
 
     //토글 스위치 상태 변경 핸들러
