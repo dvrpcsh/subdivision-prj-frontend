@@ -4,7 +4,13 @@ import KakaoMap from '../components/KakaoMap';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import styles from './MapPage.module.css';
+import '../components/PotStatusBadge.css';
+import noImage from '../assets/no-image.jpg';
+
+
 
 const MapPage = () => {
     const [location, setLocation] = useState(null);
@@ -22,24 +28,39 @@ const MapPage = () => {
 
     /**
      * map 객체, 사용자 위치(location), 검색 거리(distance)가 모두 준비되면 실행됩니다.
-     * 거리를 변경할 때마다 이 로직이 다시 실행되어 지도를 재설정합니다.
+     * 지도 제어 useEffect에 디바운싱(Debouncing) 로직을 추가합니다.
+     * 사용자가 슬라이더 조작을 멈추고 200ms가 지난 후에 딱 한 번만 실행됩니다.
      */
     useEffect(() => {
-        if (map && location && distance) {
-            // 1. 지도의 중심을 사용자의 현재 위치로 부드럽게 이동시킵니다.
+        // map이나 location 정보가 아직 준비되지 않았다면 아무것도 하지 않습니다.
+        if (!map || !location) return;
+
+        // 1.타이머를 설정합니다. (200ms = 0.2초)
+        const timer = setTimeout(() => {
+            // 2.0.2초 뒤에 아래 로직이 실행됩니다.
+            console.log(`최종 거리(${distance}km)로 지도 업데이트!`); // 디버깅용 로그
+
             const centerPoint = new window.kakao.maps.LatLng(location.latitude, location.longitude);
             map.panTo(centerPoint);
 
-            // 2. 검색 반경(distance)에 따라 지도 확대 레벨(level)을 설정합니다.
             let level;
+            //거리에 따른 지도 확대/축소
             if (distance <= 1) level = 2;
             else if (distance <= 3) level = 3;
-            else if (distance <= 5) level = 3;
-            else if (distance <= 10) level = 5;
-            else if (distance <= 20) level = 6;
-            else level = 7;
+            else if (distance <= 5) level = 4;
+            else if (distance <= 10) level = 6;
+            else if (distance <= 20) level = 7;
+            else level = 9;
             map.setLevel(level);
-        }
+
+        }, 200);
+
+        // 3.useEffect가 다시 실행될 때(distance가 바뀔 때마다) 기존 타이머를 취소합니다.
+        //    결과적으로, 사용자가 조작을 멈췄을 때의 마지막 타이머만 살아남게 됩니다.
+        return () => {
+            clearTimeout(timer);
+        };
+
         // 의존성 배열에 map, location, distance를 추가하여 이 값들이 변경될 때마다 효과가 재실행되도록 합니다.
     }, [map, location, distance]);
 
@@ -106,7 +127,6 @@ const MapPage = () => {
             } catch(err) {
                 setError('주변 팟 목록을 불러오는 데 실패했습니다.');
                 setPots([]); //에러 발생 시에도 빈 배열로 초기화
-                console.error('API Error:', err);
             } finally {
                 setLoading(false); //데이터 요청 완료 시 로딩 상태 해제
             }
@@ -132,14 +152,6 @@ const MapPage = () => {
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
-                    <select value={distance} onChange={(e) => setDistance(e.target.value)}>
-                        <option value="1">1km 이내</option>
-                        <option value="3">3km 이내</option>
-                        <option value="5">5km 이내</option>
-                        <option value="10">10km 이내</option>
-                        <option value="20">20km 이내</option>
-                        <option value="30">30km 이내</option>
-                    </select>
                     <div className={styles.categoryButtons}>
                         <button className={!category ? styles.active : ''} onClick={() => setCategory(null)}>전체</button>
                         {Object.entries(PotCategory).map(([key, displayName]) => (
@@ -188,14 +200,33 @@ const MapPage = () => {
                     <p>목록을 불러오는 중...</p>
                 ) : (
                     <ul className={styles.potList}>
-                        {pots.map((pot) => (
-                            <li key={pot.potId} className={styles.potCard} onClick={() => navigate(`/pots/${pot.potId}`)}>
-                                {pot.imageUrl && <img src={pot.imageUrl} alt={pot.productName} />}
-                                <h3>{pot.title}</h3>
-                                <p>{pot.productName}</p>
-                                <p>참여인원: {pot.currentHeadcount} / {pot.maximumHeadcount}</p>
-                            </li>
-                        ))}
+                        {pots.map((pot) => {
+                            const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
+                            return (
+                                <li key={pot.potId} className={styles.potCard} onClick={() => navigate(`/pots/${pot.potId}`)}>
+                                    <div className={styles.imageContainer}>
+                                        <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
+                                    </div>
+                                    <div className={styles.cardBody}>
+                                        <p className={styles.category}>{PotCategory[pot.category] || '기타'}</p>
+                                        <h3 className={styles.title}>{pot.title}</h3>
+                                        <p className={styles.productName}>{pot.productName}</p>
+                                        {pot.address && (
+                                            <p className={styles.address}>
+                                                <FontAwesomeIcon icon={faMapMarkerAlt} className={styles.addressIcon} />
+                                                {pot.address}
+                                            </p>
+                                        )}
+                                        <p className={styles.info}>
+                                            참여: {pot.currentHeadcount} / {pot.maximumHeadcount}
+                                            <span className={`badge ${isCompleted ? 'completed' : 'recruiting'}`}>
+                                                {isCompleted ? '모집완료' : '모집중'}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </li>
+                            );
+                        })}
                     </ul>
                 )}
             </div>

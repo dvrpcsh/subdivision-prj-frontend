@@ -4,6 +4,8 @@ import styles from './PotCard.module.css';
 import './PotStatusBadge.css';
 import { PotCategory } from '../constants/categories';
 import noImage from '../assets/no-image.jpg';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 
 const PotCard = ({ pot }) => {
     const navigate = useNavigate();
@@ -34,10 +36,25 @@ const PotCard = ({ pot }) => {
                 <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
             </div>
             <div className={styles.cardBody}>
+                {/* 1. 카테고리 */}
                 <p className={styles.category}>{PotCategory[pot.category] || '기타'}</p>
+
+                {/* 2. 제목 */}
                 <h3 className={styles.title}>{pot.title}</h3>
 
-                {/*참여 현황과 상태 배지를 함께 표시*/}
+                {/* 3. 상품명 */}
+                <p className={styles.productName}>{pot.productName}</p>
+
+                {/* [수정 2] 4. 주소 (아이콘과 함께 표시) */}
+                {/* pot 객체에 address 필드가 있을 경우에만 이 부분을 렌더링합니다. */}
+                {pot.address && (
+                    <p className={styles.address}>
+                        <FontAwesomeIcon icon={faMapMarkerAlt} className={styles.addressIcon} />
+                        {pot.address}
+                    </p>
+                )}
+
+                {/* 참여 현황과 상태 배지 */}
                 <p className={styles.info}>
                     참여: {pot.currentHeadcount} / {pot.maximumHeadcount}
                     <span className={`badge ${isCompleted ? 'completed' : 'recruiting'}`}>
