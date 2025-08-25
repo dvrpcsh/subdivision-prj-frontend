@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import { Map, MapMarker, MarkerClusterer, MapInfoWindow } from 'react-kakao-maps-sdk';
 import { useNavigate } from 'react-router-dom';
 
 const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPotId }) => {
     const navigate = useNavigate();
+    const timerRef = useRef(null);
     const hoveredPot = pots.find((pot) => pot.potId === hoveredPotId);
 
     /**
@@ -15,6 +16,22 @@ const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPot
      const handleMarkerClick = (potId) => {
         navigate(`/pots/${potId}`);
      }
+
+     //마커 위에 마우스를 올렸을 때 실행될 함수
+      const handleMouseOverMarker = (potId) => {
+         // 이전에 설정된 '숨기기' 타이머가 있다면 취소합니다.
+         clearTimeout(timerRef.current);
+         // 현재 마커를 활성화합니다.
+         setHoveredPotId(potId);
+      }
+
+      //마커나 정보창에서 마우스를 뗐을 때 실행될 함수
+      const handleMouseOut = () => {
+         // 100ms (0.1초) 후에 정보창을 숨기는 타이머를 설정합니다.
+         timerRef.current = setTimeout(() => {
+             setHoveredPotId(null);
+         }, 100);
+      }
 
      if(!userLocation) {
         return (
@@ -50,8 +67,8 @@ const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPot
                                 key={'pot-' + pot.potId}
                                 position={{ lat: pot.latitude, lng: pot.longitude }}
                                 onClick={() => handleMarkerClick(pot.potId)}
-                                onMouseOver={() => setHoveredPotId(pot.potId)}
-                                onMouseOut={() => setHoveredPotId(null)}
+                                onMouseOver={() => handleMouseOverMarker(pot.potId)}
+                                onMouseOut={handleMouseOut}
                                 isClickable={true}
                             >
                             </MapMarker>
@@ -64,10 +81,15 @@ const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPot
                 {hoveredPot && (
                     <MapInfoWindow
                         position={{ lat: hoveredPot.latitude, lng: hoveredPot.longitude }}
-                        // 정보창의 x 버튼을 클릭했을 때도 마우스오버 상태를 해제합니다.
                         onClose={() => setHoveredPotId(null)}
                     >
-                        <div style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px" }}>
+                        {/* 정보창 div에도 마우스 이벤트 핸들러를 추가합니다. */}
+                        {/* 마우스가 정보창 안으로 들어오면 '숨기기' 타이머를 취소합니다. */}
+                        <div
+                            style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px" }}
+                            onMouseOver={() => clearTimeout(timerRef.current)}
+                            onMouseOut={handleMouseOut}
+                        >
                             🛒 {hoveredPot.title}
                         </div>
                     </MapInfoWindow>
