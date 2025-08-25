@@ -12,23 +12,34 @@ const MapPage = () => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState(null);
-    const [distance, setDistance] = useState(10);
+    const [distance, setDistance] = useState(1); //최초 로딩 시 1km로 설정
     const [status, setStatus] = useState('RECRUITING');
-    const [map, setMap] = useState(); //KakaoMap.js에서 지도 객체를 받아올 state
+    const [map, setMap] = useState();//지도 인스턴스를 저장할 상태. 이 상태를 자식 컴포넌트(KakaoMap)와 공유합니다.
     const navigate = useNavigate();
 
+
+    /**
+     * map 객체, 사용자 위치(location), 검색 거리(distance)가 모두 준비되면 실행됩니다.
+     * 거리를 변경할 때마다 이 로직이 다시 실행되어 지도를 재설정합니다.
+     */
     useEffect(() => {
-        if (map && distance) {
-            // 지도의 확대 레벨을 동적으로 변경 (숫자가 작을수록 확대)
-            // 이 값은 실제 서비스에 맞게 미세 조정이 필요합니다.
+        if (map && location && distance) {
+            // 1. 지도의 중심을 사용자의 현재 위치로 부드럽게 이동시킵니다.
+            const centerPoint = new window.kakao.maps.LatLng(location.latitude, location.longitude);
+            map.panTo(centerPoint);
+
+            // 2. 검색 반경(distance)에 따라 지도 확대 레벨(level)을 설정합니다.
             let level;
-            if (distance <= 1) level = 5;
-            else if (distance <= 3) level = 6;
-            else if (distance <= 5) level = 7;
-            else level = 8;
+            if (distance <= 1) level = 2;
+            else if (distance <= 3) level = 2;
+            else if (distance <= 5) level = 3;
+            else if (distance <= 10) level = 5;
+            else if (distance <= 20) level = 6;
+            else level = 7;
             map.setLevel(level);
         }
-    }, [map, distance]);
+        // 의존성 배열에 map, location, distance를 추가하여 이 값들이 변경될 때마다 효과가 재실행되도록 합니다.
+    }, [map, location, distance]);
 
     //로그아웃 핸들러
     const handleLogout = () => {
@@ -44,7 +55,6 @@ const MapPage = () => {
 
     //컴포넌트가 처음 마운트될 때 사용자의 위치를 가져오는 useEffect
     useEffect(() => {
-
         if(!navigator.geolocation) {
             setError('Geolocation is not supported by your browser');
             setLoading(false);
@@ -64,13 +74,12 @@ const MapPage = () => {
         );
     }, []);
 
-    //위치나 검색 필터가 변결될 때 마다 API를 호출합니다.
+    //위치나 검색 필터가 변경될 때 마다 API를 호출합니다.
     useEffect(() => {
         //위치 정보가 있어야만 API를 호출합니다.
         if(!location) return;
 
         const fetchPots = async () => {
-            if (!location) return;
             setLoading(true); //데이터 요청 시작 시 로딩 상태로 설정
             try {
                 const token = localStorage.getItem('jwt');
@@ -126,6 +135,8 @@ const MapPage = () => {
                         <option value="3">3km 이내</option>
                         <option value="5">5km 이내</option>
                         <option value="10">10km 이내</option>
+                        <option value="20">20km 이내</option>
+                        <option value="30">30km 이내</option>
                     </select>
                     <div className={styles.categoryButtons}>
                         <button className={!category ? styles.active : ''} onClick={() => setCategory(null)}>전체</button>
@@ -146,7 +157,7 @@ const MapPage = () => {
                         <input
                             type="range"
                             min="1"
-                            max="10"
+                            max="30"
                             step="1" //1km 단위로 표시
                             value={distance}
                             onChange={(e) => setDistance(Number(e.target.value))}
@@ -189,7 +200,8 @@ const MapPage = () => {
 
             {/* 3. 오른쪽 지도 영역 */}
             <div className={styles.mapContent}>
-                <KakaoMap userLocation={location} pots={pots} setMap={setMap} />
+                {/* 자식 컴포넌트(KakaoMap)에 map 상태와 setMap 함수를 모두 props로 전달합니다. */}
+                <KakaoMap userLocation={location} pots={pots} map={map} setMap={setMap} />
             </div>
         </div>
     </div>

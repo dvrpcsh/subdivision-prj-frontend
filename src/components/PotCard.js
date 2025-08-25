@@ -1,16 +1,35 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import styles from './PotCard.module.css';
 import './PotStatusBadge.css';
 import { PotCategory } from '../constants/categories';
 import noImage from '../assets/no-image.jpg';
 
 const PotCard = ({ pot }) => {
+    const navigate = useNavigate();
     //모집 완료 여부를 확인하는 변수
     const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
 
+    /**
+     * 카드 클릭 시 실행될 핸들러 함수를 새로 만듭니다.
+     * 이 함수 안에서 로그인 여부를 확인하고 조건에 따라 다른 페이지로 이동시킵니다.
+     */
+    const handleCardClick = () => {
+        // 로컬 스토리지에서 'jwt' 토큰을 가져옵니다.
+        const token = localStorage.getItem('jwt');
+
+        if (token) {
+            // 토큰이 있으면 (로그인 상태), 상세 페이지로 이동합니다.
+            navigate(`/pots/${pot.potId}`);
+        } else {
+            // 토큰이 없으면 (로그인 안 한 상태), 알림을 띄우고 로그인 페이지로 이동합니다.
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/login');
+        }
+    };
+
     return (
-        <Link to={`/pots/${pot.potId}`} className={styles.card}>
+        <div onClick={handleCardClick} className={styles.card}>
             <div className={styles.imageContainer}>
                 <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
             </div>
@@ -26,7 +45,7 @@ const PotCard = ({ pot }) => {
                     </span>
                 </p>
             </div>
-        </Link>
+        </div>
     );
 };
 
