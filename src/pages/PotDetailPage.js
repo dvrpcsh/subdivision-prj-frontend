@@ -3,8 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './PotDetailPage.module.css';
 import { AuthContext } from '../context/AuthContext';
+import '../components/PotStatusBadge.css';
 
 const PotDetailPage = () => {
+
     //URL 경로의 파라미터(:potId)를 가져옵니다.
     const { potId } = useParams();
     const navigate = useNavigate();
@@ -100,6 +102,11 @@ const PotDetailPage = () => {
     //모집인원에 따른 모집중/모집완료 구분 값
     const isFull = pot.currentHeadcount >= pot.maximumHeadcount;
 
+    if(!pot) return <div>게시물 정보를 찾을 수 없습니다.</div>;
+
+    //모집 완료 여부를 확인하는 변수
+    const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
+
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
         <div className={styles.pageContainer}>
@@ -143,7 +150,11 @@ const PotDetailPage = () => {
 
           <div className={styles.section}>
             <h3>참여 현황</h3>
-            <p>{pot.currentHeadcount} / {pot.maximumHeadcount} 명</p>
+            <p>{pot.currentHeadcount} / {pot.maximumHeadcount} 명
+            <span className={`badge ${isCompleted ? 'completed' : 'completed'}`}>
+              {isCompleted ? '모집완료' : '모집중'}
+            </span>
+            </p>
             <h4>참여자 목록</h4>
             <ul className={styles.memberList}>
               {pot.members.map((member, index) => (

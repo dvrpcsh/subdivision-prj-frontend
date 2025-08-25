@@ -11,6 +11,7 @@ import MyPage from './pages/MyPage';
 import PotCreatePage from './pages/PotCreatePage';
 import SignupPage from './pages/SignupPage';
 import OAuth2RedirectPage from './pages/OAuth2RedirectPage';
+import HomePage from './pages/HomePage';
 
 function App() {
 
@@ -20,7 +21,8 @@ function App() {
 
             <main className="main-content">
                 <Routes>
-                    <Route path="/" element={<MainPage />} />
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/map" element={<MainPage />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/signup" element={<SignupPage />} />
                     <Route path="/pots/:potId" element={<PotDetailPage />} />

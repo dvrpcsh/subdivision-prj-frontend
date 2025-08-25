@@ -1,0 +1,19 @@
+/* src/components/PotStatusBadge.css */
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.recruiting {
+  background-color: #28a745; /* 초록색 */
+  color: white;
+}
+
+.completed {
+  background-color: #6c757d; /* 회색 */
+  color: white;
+}
