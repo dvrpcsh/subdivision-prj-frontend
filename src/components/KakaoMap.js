@@ -2,10 +2,9 @@ import React, { useState } from 'react';
 import { Map, MapMarker, MarkerClusterer, MapInfoWindow } from 'react-kakao-maps-sdk';
 import { useNavigate } from 'react-router-dom';
 
-const KakaoMap = ({ userLocation, pots = [], setMap }) => {
+const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPotId }) => {
     const navigate = useNavigate();
-    //마우스를 올린 마커의 정보창을 관리하기 위한 state를 추가합니다.
-    const [hoveredPotId, setHoveredPotId] = useState(null);
+    const hoveredPot = pots.find((pot) => pot.potId === hoveredPotId);
 
     /**
      *  KakaoMap 컴포넌트는 순수 지도 렌더링만 담당
@@ -39,32 +38,40 @@ const KakaoMap = ({ userLocation, pots = [], setMap }) => {
                     <div style={{ padding: "5px", color: "red", textAlign: "center" }}>📍 내 위치</div>
                 </MapMarker>
 
-                {/* 주변 팟 마커들 뭉치면 숫자로 보임(MarkerClusterer적용) */}
-                <MarkerClusterer
-                    averageCenter={true} // 클러스터 마커를 중앙으로 설정
-                    minLevel={6} // 클러스터 할 최소 지도 레벨 (숫자가 작을수록 확대된 상태)
-                >
-                    {/* 주변 팟 마커들 */}
-                    {pots.map((pot) => (
-                        <MapMarker
-                            key={'pot-' + pot.potId}
-                            position={{ lat: pot.latitude, lng: pot.longitude }}
-                            onClick={() => handleMarkerClick(pot.potId)}
-                            onMouseOver={() => setHoveredPotId(pot.potId)}
-                            onMouseOut={() => setHoveredPotId(null)}
-                            isClickable={true}
-                        >
-                            {/* 마우스를 올린 마커에만 정보창 표시 */}
-                            {hoveredPotId === pot.potId && (
-                                <MapInfoWindow position={{ lat: pot.latitude, lng: pot.longitude }}>
-                                    <div style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px" }}>
-                                        🛒 {pot.title}
-                                    </div>
-                                </MapInfoWindow>
-                            )}
-                        </MapMarker>
-                    ))}
-                </MarkerClusterer>
+                {pots.length > 0 && (
+                    <MarkerClusterer
+                        key={JSON.stringify(pots)}
+                        averageCenter={true}
+                        minLevel={4}
+                        styles={[{ width: "30px", height: "30px", background: "rgba(51, 204, 255, .8)", borderRadius: "15px", color: "#fff", textAlign: "center", fontWeight: "bold", lineHeight: "31px" }]}
+                    >
+                        {pots.map((pot) => (
+                            <MapMarker
+                                key={'pot-' + pot.potId}
+                                position={{ lat: pot.latitude, lng: pot.longitude }}
+                                onClick={() => handleMarkerClick(pot.potId)}
+                                onMouseOver={() => setHoveredPotId(pot.potId)}
+                                onMouseOut={() => setHoveredPotId(null)}
+                                isClickable={true}
+                            >
+                            </MapMarker>
+                        ))}
+                    </MarkerClusterer>
+                )}
+
+                {/* 정보창을 지도 레벨에서 직접, 단 하나만 렌더링합니다. */}
+                {/* hoveredPot 객체가 존재할 때만 정보창이 보이게 됩니다. */}
+                {hoveredPot && (
+                    <MapInfoWindow
+                        position={{ lat: hoveredPot.latitude, lng: hoveredPot.longitude }}
+                        // 정보창의 x 버튼을 클릭했을 때도 마우스오버 상태를 해제합니다.
+                        onClose={() => setHoveredPotId(null)}
+                    >
+                        <div style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px" }}>
+                            🛒 {hoveredPot.title}
+                        </div>
+                    </MapInfoWindow>
+                )}
             </Map>
         </div>
      );

@@ -25,6 +25,9 @@ const MapPage = () => {
     const navigate = useNavigate();
     const { logout } = useContext(AuthContext);
 
+    //마우스가 올라간 팟의 ID를 저장하기 위한 상태를 추가합니다.
+    const [hoveredPotId, setHoveredPotId] = useState(null);
+
 
     /**
      * map 객체, 사용자 위치(location), 검색 거리(distance)가 모두 준비되면 실행됩니다.
@@ -63,6 +66,22 @@ const MapPage = () => {
 
         // 의존성 배열에 map, location, distance를 추가하여 이 값들이 변경될 때마다 효과가 재실행되도록 합니다.
     }, [map, location, distance]);
+
+    /**
+     * hoveredPotId가 변경될 때 지도를 해당 마커 위치로 이동시키는 useEffect를 추가합니다.
+     */
+    useEffect(() => {
+        // map 객체가 있고, hoveredPotId가 null이 아닐 때만 실행합니다.
+        if (map && hoveredPotId) {
+            // pots 배열에서 마우스가 올라간 팟 정보를 찾습니다.
+            const hoveredPot = pots.find(pot => pot.potId === hoveredPotId);
+            if (hoveredPot) {
+                // 해당 팟의 위치로 지도를 부드럽게 이동시킵니다.
+                const centerPoint = new window.kakao.maps.LatLng(hoveredPot.latitude, hoveredPot.longitude);
+                map.panTo(centerPoint);
+            }
+        }
+    }, [hoveredPotId, map, pots]); // hoveredPotId, map, pots가 변경될 때마다 이 효과를 재실행합니다.
 
     //로그아웃 핸들러
     const handleLogout = () => {
@@ -203,7 +222,14 @@ const MapPage = () => {
                         {pots.map((pot) => {
                             const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
                             return (
-                                <li key={pot.potId} className={styles.potCard} onClick={() => navigate(`/pots/${pot.potId}`)}>
+                                //li 태그에 onMouseOver와 onMouseOut 이벤트를 추가합니다.
+                                <li
+                                    key={pot.potId}
+                                    className={styles.potCard}
+                                    onClick={() => navigate(`/pots/${pot.potId}`)}
+                                    onMouseOver={() => setHoveredPotId(pot.potId)}
+                                    onMouseOut={() => setHoveredPotId(null)}
+                                >
                                     <div className={styles.imageContainer}>
                                         <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
                                     </div>
@@ -233,8 +259,15 @@ const MapPage = () => {
 
             {/* 3. 오른쪽 지도 영역 */}
             <div className={styles.mapContent}>
-                {/* 자식 컴포넌트(KakaoMap)에 map 상태와 setMap 함수를 모두 props로 전달합니다. */}
-                <KakaoMap userLocation={location} pots={pots} map={map} setMap={setMap} />
+                {/* 자식 컴포넌트(KakaoMap)에 hoveredPotId와 setHoveredPotId, map 상태와 setMap 함수를 모두 props로 전달합니다. */}
+                <KakaoMap
+                    userLocation={location}
+                    pots={pots}
+                    map={map}
+                    setMap={setMap}
+                    hoveredPotId={hoveredPotId}
+                    setHoveredPotId={setHoveredPotId}
+                />
             </div>
         </div>
     </div>
