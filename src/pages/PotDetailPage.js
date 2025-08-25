@@ -4,6 +4,7 @@ import axios from 'axios';
 import styles from './PotDetailPage.module.css';
 import { AuthContext } from '../context/AuthContext';
 import '../components/PotStatusBadge.css';
+import noImage from '../assets/no-image.jpg';
 
 const PotDetailPage = () => {
 
@@ -107,6 +108,9 @@ const PotDetailPage = () => {
     //모집 완료 여부를 확인하는 변수
     const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
 
+    //content의 줄바꿈(\n)을 <br> 태그로 변환한 HTML 문자열을 미리 만듭니다.
+    const contentWithBreaks = pot.content.replace(/\n/g, '<br />');
+
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
         <div className={styles.pageContainer}>
@@ -137,15 +141,17 @@ const PotDetailPage = () => {
 
           {pot.imageUrl && (
             <div className={styles.imageContainer}>
-              <img src={pot.imageUrl} alt={pot.productName} className={styles.potImage} />
+              <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.potImage} />
             </div>
           )}
 
           <div className={styles.section}>
-            <h3>상품 정보</h3>
-            <p><strong>상품명:</strong> {pot.productName}</p>
-            {/* dangerouslySetInnerHTML을 사용하여 줄바꿈(\n)을 <br>로 렌더링 */}
-            <p><strong>내용:</strong> <span dangerouslySetInnerHTML={{ __html: pot.content.replace(/\n/g, '<br />') }} /></p>
+              <h3>상품 정보</h3>
+              <p><strong>상품명:</strong> {pot.productName}</p>
+              <p><strong>내용:</strong>
+                  {/* 미리 만들어둔 변수를 사용하여 dangerouslySetInnerHTML을 호출합니다. */}
+                  <span dangerouslySetInnerHTML={{ __html: contentWithBreaks }} />
+              </p>
           </div>
 
           <div className={styles.section}>

@@ -15,7 +15,38 @@
   justify-content: center;
   align-items: center;
   margin-top: 40px;
-  gap: 15px;
+  gap: 8px; /* 버튼 사이 간격 */
+}
+
+/* 각 페이지 버튼의 기본 스타일 */
+.pageButton {
+  border: 1px solid #ddd;
+  background-color: white;
+  color: #333;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%; /* 원형 버튼 */
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+/* 버튼 호버 및 비활성화 스타일 */
+.pageButton:hover {
+  background-color: #f0f0f0;
+}
+
+.pageButton:disabled {
+  background-color: #f8f9fa;
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* 현재 활성화된 페이지 버튼 스타일 */
+.pageButton.active {
+  background-color: #007BFF;
+  color: white;
+  border-color: #007BFF;
 }
 
 /* 필터 영역 전체 스타일 */
@@ -136,4 +167,24 @@
     align-items: center;
     gap: 20px; /* 토글과 검색창 사이 간격 */
     width: 60%; /* 전체 가로 길이 조정 */
+}
+
+/* CTA 섹션 스타일 */
+.ctaSection {
+  text-align: center;
+  /* padding, background-color 등은 제거하여 검색창과 가깝게 만듭니다. */
+  margin-bottom: 30px; /* 검색창과의 간격 */
+}
+
+/* CTA 텍스트(h2) 스타일 */
+.ctaText {
+  font-size: 1.8rem; /* 글씨 크기 키우기 */
+  font-weight: 700;
+  cursor: pointer; /* 마우스를 올리면 손가락 모양으로 변경 */
+  display: inline-block; /* 클릭 영역을 텍스트 크기에 맞춤 */
+  transition: color 0.2s;
+}
+
+.ctaText:hover {
+  color: #007BFF; /* 마우스를 올리면 메인 색상으로 변경 */
 }

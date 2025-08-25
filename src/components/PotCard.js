@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import styles from './PotCard.module.css';
 import './PotStatusBadge.css';
 import { PotCategory } from '../constants/categories';
+import noImage from '../assets/no-image.jpg';
 
 const PotCard = ({ pot }) => {
     //모집 완료 여부를 확인하는 변수
@@ -11,11 +12,7 @@ const PotCard = ({ pot }) => {
     return (
         <Link to={`/pots/${pot.potId}`} className={styles.card}>
             <div className={styles.imageContainer}>
-                {pot.imageUrl ? (
-                    <img src={pot.imageUrl} alt={pot.productName} className={styles.cardImage} />
-                ) : (
-                    <div className={styles.cardImage} /> /* 이미지가 없을 때 빈 공간 */
-                )}
+                <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
             </div>
             <div className={styles.cardBody}>
                 <p className={styles.category}>{PotCategory[pot.category] || '기타'}</p>

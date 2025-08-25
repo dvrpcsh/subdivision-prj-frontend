@@ -3,9 +3,9 @@ import axios from 'axios';
 import KakaoMap from '../components/KakaoMap';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
-import styles from './MainPage.module.css';
+import styles from './MapPage.module.css';
 
-const MainPage = () => {
+const MapPage = () => {
     const [location, setLocation] = useState(null);
     const [pots, setPots] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -14,7 +14,21 @@ const MainPage = () => {
     const [category, setCategory] = useState(null);
     const [distance, setDistance] = useState(10);
     const [status, setStatus] = useState('RECRUITING');
+    const [map, setMap] = useState(); //KakaoMap.js에서 지도 객체를 받아올 state
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (map && distance) {
+            // 지도의 확대 레벨을 동적으로 변경 (숫자가 작을수록 확대)
+            // 이 값은 실제 서비스에 맞게 미세 조정이 필요합니다.
+            let level;
+            if (distance <= 1) level = 5;
+            else if (distance <= 3) level = 6;
+            else if (distance <= 5) level = 7;
+            else level = 8;
+            map.setLevel(level);
+        }
+    }, [map, distance]);
 
     //로그아웃 핸들러
     const handleLogout = () => {
@@ -125,6 +139,20 @@ const MainPage = () => {
                             </button>
                         ))}
                     </div>
+
+                    {/* 거리 필터 슬라이더 UI */}
+                    <div className={styles.distanceFilter}>
+                        <label>검색 거리: {distance}km</label>
+                        <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            step="1" //1km 단위로 표시
+                            value={distance}
+                            onChange={(e) => setDistance(Number(e.target.value))}
+                            className={styles.slider}
+                        />
+                    </div>
                 </div>
 
                 {/* 상태 필터 버튼 */}
@@ -161,11 +189,11 @@ const MainPage = () => {
 
             {/* 3. 오른쪽 지도 영역 */}
             <div className={styles.mapContent}>
-                <KakaoMap userLocation={location} pots={pots} />
+                <KakaoMap userLocation={location} pots={pots} setMap={setMap} />
             </div>
         </div>
     </div>
     );
 };
 
-export default MainPage;
+export default MapPage;

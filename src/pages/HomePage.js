@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import PotCard from '../components/PotCard';
 import { PotCategory } from '../constants/categories';
+import { useNavigate } from 'react-router-dom';
 import styles from './HomePage.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
@@ -10,12 +11,26 @@ const HomePage = () => {
     const [pots, setPots] = useState([]);
     const [page, setPage] = useState(0); //현재 페이지 번호
     const [totalPages, setTotalPages] = useState(0); //전체 페이지 수
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(false); //로딩 상태를 관리
+    const [error, setError] = useState(''); // 에러 상태도 함께 관리
 
     //검색과 필터를 위한 state
     const [searchTerm, setSearchTerm] = useState('');
     const [category, setCategory] = useState(null);
     const [status, setStatus] = useState(null);
+
+    const navigate = useNavigate();
+
+    //'우리 동네 팟 찾기' 버튼 클릭 핸들러
+    const handleCtaClick = () => {
+        const token = localStorage.getItem('jwt');
+        if (token) {
+            navigate('/map');
+        } else {
+            alert('로그인이 필요한 서비스입니다.');
+            navigate('/login');
+        }
+    };
 
     useEffect(() => {
         const fetchPots = async () => {
@@ -48,6 +63,26 @@ const HomePage = () => {
         fetchPots();
     }, [page, searchTerm, category, status]); //page가 변경될 때 마다 데이터를 다시 불러옵니다.
 
+    //로딩 및 에러 상태에 따라 다른 UI를 보여주는 함수
+    const renderContent = () => {
+        if (loading) {
+            return <p className={styles.infoText}>팟 목록을 불러오는 중입니다...</p>;
+        }
+        if (error) {
+            return <p className={styles.errorText}>{error}</p>;
+        }
+        if (pots.length === 0) {
+            return <p className={styles.infoText}>주변에 진행 중인 팟이 없습니다.</p>;
+        }
+        return (
+            <div className={styles.grid}>
+                {pots.map(pot => (
+                    <PotCard key={pot.potId} pot={pot} />
+                ))}
+            </div>
+        );
+    };
+
     //토글 스위치 상태 변경 핸들러
     const handleStatusToggle = (e) => {
         //체크되면 'RECRUITING', 해제되면 null(전체보기) 상태로 변경
@@ -56,6 +91,12 @@ const HomePage = () => {
 
     return (
         <div className={styles.container}>
+            {/*주변 팟 찾기 클릭*/}
+            <div className={styles.ctaSection}>
+                <h2 onClick={handleCtaClick} className={styles.ctaText}>
+                    우리 동네 근처 팟 찾으러가기(클릭)!
+                </h2>
+            </div>
             {/* 검색 및 카테고리 필터 UI */}
             <div className={styles.filters}>
 
@@ -102,23 +143,40 @@ const HomePage = () => {
                     ))}
                 </div>
 
-                <div className={styles.grid}>
-                    {pots.map(pot => (
-                        <PotCard key={pot.potId} pot={pot} />
-                    ))}
-                </div>
+                {renderContent()}
 
                 {/* 페이지네이션 UI */}
                 <div className={styles.pagination}>
-                    <button onClick={() => setPage(p => Math.max(0, p-1))} disabled={page === 0}>
-                        이전
+                    {/* 이전 페이지 버튼 */}
+                    <button
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 0}
+                        className={styles.pageButton}
+                    >
+                        &lt;
                     </button>
-                    <span>{page + 1} / {totalPages}</span>
-                    <button onClick={() => setPage(p => Math.min(totalPages-1, p+1))} disabled={page === totalPages-1}>
-                        다음
+
+                    {/* 페이지 번호 버튼들 */}
+                    {/* Array.from을 사용하여 전체 페이지 수만큼 배열을 만들고, 각 페이지 번호에 대한 버튼을 생성합니다. */}
+                    {Array.from({ length: totalPages }, (_, i) => (
+                        <button
+                            key={i}
+                            onClick={() => setPage(i)}
+                            className={`${styles.pageButton} ${page === i ? styles.active : ''}`}
+                        >
+                            {i + 1}
+                        </button>
+                    ))}
+
+                    {/* 다음 페이지 버튼 */}
+                    <button
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages - 1}
+                        className={styles.pageButton}
+                    >
+                        &gt;
                     </button>
                 </div>
-
             </div>
         </div>
     );
