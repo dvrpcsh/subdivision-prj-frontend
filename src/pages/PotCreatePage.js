@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import './PotCreatePage.css';
 import { PotCategory } from '../constants/categories';
-import LocationPicker from '../components/LocationPicker';
 
 const PotCreatePage = () => {
     const [title, setTitle] = useState('');
@@ -18,12 +18,24 @@ const PotCreatePage = () => {
 
     //위치 및 주소찾기
     const openPostcodePopup = useDaumPostcodePopup();
-
     const [location, setLocation] = useState(null);
     const [address, setAddress] = useState('');
     const [detailAddress, setDetailAddress] = useState('');
     const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
     const navigate = useNavigate();
+
+    //지도에 표시할 마커의 위치를 위한 state
+    const [markerPosition, setMarkerPosition] = useState(null);
+
+    //컴포넌트가 처음 로딩될 때 사용자의 현재 위치를 가져와 지도를 초기화합니다.
+    useEffect(() => {
+        navigator.geolocation.getCurrentPosition((position) => {
+            const { latitude, longitude } = position.coords;
+            const userCoords = { lat: latitude, lng: longitude };
+            setLocation(userCoords);
+            setMarkerPosition(userCoords);
+        });
+    }, []);
 
     //이미지 파일 선택 시 실행 될 핸들러
     const handleImageChange = (e) => {
@@ -79,10 +91,29 @@ const PotCreatePage = () => {
     }
 
     //지도를 클릭했을 때 실행될 핸들러
-    const handleLocationSelect = (selectedLocation) => {
-        setLocation(selectedLocation);
-        //(선택) 좌표를 주소로 변환하여 주소창에 표시할 수도 있습니다.
-    };
+    const handleMapClick = (_map, mouseEvent) => {
+        const latlng = mouseEvent.latLng;
+        const newCoords = { lat: latlng.getLat(), lng: latlng.getLng() };
+
+        //클릭한 위치의 좌표를 location과 markerPosition state에 업데이트합니다.
+        setLocation(newCoords);
+        setMarkerPosition(newCoords);
+
+        //카카오맵 지오코더 API를 사용해 좌표를 주소로 변환합니다.
+        const geocoder = new window.kakao.maps.services.Geocoder();
+        geocoder.coord2Address(newCoords.lng, newCoords.lat, (result, status) => {
+            if(status === window.kakao.maps.services.Status.OK) {
+                //도로명 주소가 있으면 도로명 주소를, 없으면 지번 주소를 사용합니다.
+                const addressName = result[0].road_address
+                ? result[0].road_address.address_name
+                : result[0].address.address_name;
+
+                //변환된 주소를 address state에 업데이트하여 입력창에 표시합니다.
+                setAddress(addressName);
+            }
+        })
+
+    }
 
     //폼 제출 시 실행 될 핸들러
     const handleSubmit = async (e) => {
@@ -198,7 +229,20 @@ const PotCreatePage = () => {
                 {/*위치 선택 지도*/}
                 <div className="form-group">
                     <p style={{fontSize: '14px', color: '#666'}}>또는 지도에서 직접 위치를 클릭하세요.</p>
-                    <LocationPicker onLocationSelect={handleLocationSelect} selectedLocation={location} />
+                    {/* 지도가 로딩되었을 때만 (location state가 있을 때만) Map을 렌더링합니다. */}
+                    {location && (
+                        <div style={{ width: '100%', height: '400px' }}>
+                            <Map
+                                center={location}
+                                style={{ width: '100%', height: '100%' }}
+                                level={3}
+                                onClick={handleMapClick} // 지도에 클릭 이벤트 핸들러를 연결합니다.
+                            >
+                                {/* 클릭한 위치에 마커를 표시합니다. */}
+                                {markerPosition && <MapMarker position={markerPosition} />}
+                            </Map>
+                        </div>
+                    )}
                 </div>
 
                 <div className="form-group">

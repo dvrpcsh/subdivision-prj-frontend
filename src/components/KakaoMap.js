@@ -86,9 +86,10 @@ const KakaoMap = ({ userLocation, pots = [], setMap, hoveredPotId, setHoveredPot
                         {/* 정보창 div에도 마우스 이벤트 핸들러를 추가합니다. */}
                         {/* 마우스가 정보창 안으로 들어오면 '숨기기' 타이머를 취소합니다. */}
                         <div
-                            style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px" }}
+                            style={{ padding: "5px", color: "#000", whiteSpace: "nowrap", fontSize: "14px", cursor: "pointer" }}
                             onMouseOver={() => clearTimeout(timerRef.current)}
                             onMouseOut={handleMouseOut}
+                            onClick={() => handleMarkerClick(hoveredPot.potId)}
                         >
                             🛒 {hoveredPot.title}
                         </div>
