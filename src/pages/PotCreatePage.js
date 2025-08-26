@@ -11,6 +11,7 @@ const PotCreatePage = () => {
     const [content, setContent] = useState('');
     const [productName, setProductName] = useState('');
     const [maximumHeadcount, setMaximumHeadcount] = useState(2);
+    const [price, setPrice] = useState('');
     //이미지 파일과 미리보기 URL을 위한 state 추가
     const [imageFile, setImageFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState('');
@@ -36,6 +37,11 @@ const PotCreatePage = () => {
             setMarkerPosition(userCoords);
         });
     }, []);
+
+    //총 가격과 인원수에 따라 1인당 부담 비용을 실시간으로 계산합니다.
+    const costPerPerson = (price && maximumHeadcount > 0)
+        ? Math.floor(price / maximumHeadcount)
+        : 0;
 
     //이미지 파일 선택 시 실행 될 핸들러
     const handleImageChange = (e) => {
@@ -126,6 +132,13 @@ const PotCreatePage = () => {
             return;
         }
 
+        //가격이 입력되었는지 유효성 검사
+        if(!price) {
+            alert('가격을 입력해주세요.');
+
+            return;
+        }
+
         let imageUrl = '';
 
         //이미지가 선택되었으면 S3에 먼저 업로드
@@ -157,14 +170,14 @@ const PotCreatePage = () => {
                 title,
                 content,
                 productName,
-                maximumHeadcount: parseInt(maximumHeadcount, 10),
                 imageUrl,
-
+                maximumHeadcount: parseInt(maximumHeadcount, 10),
+                price: parseInt(price, 10),
                 latitude: location.lat,
                 longitude: location.lng,
-                category: category,
-                address: address,
-                detailAddress: detailAddress
+                category,
+                address,
+                detailAddress
             };
 
             const response = await axios.post('http://localhost:8080/api/pots', potData, {
@@ -218,11 +231,29 @@ const PotCreatePage = () => {
                     </select>
                 </div>
 
-                /* 주소 관련 UI */
+                {/* 가격 및 인원 설정 섹션*/}
+                <div className="form-group price-section">
+                    <div className="price-input">
+                        <label htmlFor="price">총 가격</label>
+                        <input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="총액(원)" required />
+                    </div>
+                    <div className="headcount-input">
+                        <label htmlFor="maximumHeadcount">최대 참여 인원</label>
+                        <input id="maximumHeadcount" type="number" value={maximumHeadcount} onChange={(e) => setMaximumHeadcount(e.target.value)} min="2" required />
+                    </div>
+                    <div className="cost-display">
+                        <label>1인당 부담 비용</label>
+                        <p>{costPerPerson.toLocaleString()} 원</p>
+                    </div>
+                </div>
+
+                {/* 주소 관련 UI */}
                 <div className="form-group">
                     <label>팟 생성 위치</label>
-                    <button type="button" onClick={handleAddressSearch}>주소 검색</button>
-                    <input type="text" value={address} placeholder="주소" readOnly />
+                    <div className="address-search-bar">
+                        <button type="button" onClick={handleAddressSearch}>주소 검색</button>
+                        <input type="text" value={address} placeholder="주소" readOnly />
+                    </div>
                     <input type="text" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} placeholder="상세주소 입력" />
                 </div>
 
@@ -245,24 +276,12 @@ const PotCreatePage = () => {
                     )}
                 </div>
 
-                <div className="form-group">
-                    <label htmlFor="maximumHeadcount">최대 참여 인원</label>
-                    <input id="maximumHeadcount" type="number" value={maximumHeadcount} onChange={(e) => setMaximumHeadcount(e.target.value)} min="2" required />
-                </div>
-
                 {/* 이미지 선택 UI */}
                 <div className="form-group">
-                    <label>상품 이미지: </label>
-                    <input id="image" type="file" accept="image/*" onChange={handleImageChange} />
+                    <label htmlFor="image">상품 이미지 (선택)</label>
+                    <input id="image" type="file" accept="image/*" onChange={(e) => handleImageChange(e)} />
                 </div>
-
-                {/* 이미지 미리보기 UI */}
-                {previewUrl && (
-                    <div>
-                        <p>미리보기:</p>
-                        <img src={previewUrl} alt="Preview" className="preview-image" />
-                    </div>
-                )}
+                {previewUrl && (<div className="preview-container"><img src={previewUrl} alt="Preview" className="preview-image" /></div>)}
 
                 <button type="submit" className="submit-button">작성 완료</button>
             </form>

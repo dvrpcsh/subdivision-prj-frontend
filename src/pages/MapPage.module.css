@@ -1,7 +1,9 @@
+/* MapPage.module.css */
+
 /* 메인 컨테이너: 2단 레이아웃의 기준이 됩니다. */
 .mainContainer {
   display: flex;
-  height: calc(100vh - 100px); /* 헤더 높이를 제외한 전체 화면 높이 */
+  height: calc(100vh - 80px); /* 헤더 높이를 고려한 전체 화면 높이 */
 }
 
 /* 왼쪽 사이드바: 검색 필터와 팟 목록을 담습니다. */
@@ -10,12 +12,13 @@
   padding: 20px;
   overflow-y: auto; /* 내용이 길어지면 스크롤 생성 */
   border-right: 1px solid #ddd;
+  background-color: #f9f9f9;
 }
 
 /* 오른쪽 콘텐츠: 지도를 담습니다. */
 .mapContent {
   width: 60%;
-  position: relative; /* 자식 요소의 기준점 */
+  position: relative;
 }
 
 /* 검색 필터 영역 */
@@ -39,11 +42,12 @@
 }
 
 .categoryButtons button {
-  padding: 5px 10px;
+  padding: 5px 12px;
   border: 1px solid #ccc;
   border-radius: 15px;
   background-color: white;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .categoryButtons button.active {
@@ -54,33 +58,36 @@
 
 /* 팟 목록 스타일 */
 .potList {
-  list-style: none; /* 목록 앞에 붙는 점 제거 */
+  list-style: none;
   padding: 0;
-  margin: 20px 0 0 0; /* 목록 위쪽에 여백 추가 */
-  display: grid; /* 그리드 레이아웃 활성화 */
-  grid-template-columns: repeat(2, 1fr); /* 2개의 동일한 너비의 열 생성 */
-  gap: 16px; /* 카드와 카드 사이의 간격 */
+  margin: 20px 0 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  /* [핵심 수정] align-items: start; 속성을 제거했습니다. */
+  /* 이제 그리드의 기본값인 'stretch'가 적용되어 같은 행의 카드들이 동일한 높이를 갖게 됩니다. */
 }
 
 .potCard {
+  display: flex;
+  flex-direction: column;
   border: 1px solid #e0e0e0;
-  border-radius: 12px; /* 모서리를 더 둥글게 */
-  overflow: hidden; /* 이미지가 모서리를 삐져나가지 않도록 함 */
+  border-radius: 12px;
+  overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   background-color: #fff;
 }
 
 .potCard:hover {
-  transform: translateY(-4px); /* 마우스를 올리면 살짝 위로 올라가는 효과 */
+  transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* 이미지를 감싸는 div의 스타일 */
 .imageContainer {
   width: 100%;
-  overflow: hidden;
-  aspect-ratio: 16 / 9; /* 이미지 가로세로 비율 고정 */
+  aspect-ratio: 16 / 9;
   background-color: #f0f0f0;
 }
 
@@ -88,57 +95,50 @@
 .cardImage {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* 이미지 비율을 유지하며 컨테이너 채우기 */
-  display: block;
-  transition: transform 0.3s ease;
-}
-
-.potCard:hover .cardImage {
-  transform: scale(1.05); /* 마우스를 올리면 이미지가 살짝 커지는 효과 */
+  object-fit: cover;
 }
 
 /* 카드 본문 스타일 */
 .cardBody {
   padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
 }
 
-.potCard img {
-  width: 100%;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 10px;
-}
-
-.potCard h3 {
+.cardBody h3 {
   font-size: 1.1rem;
-  margin-bottom: 5px;
+  margin: 8px 0; /* 위아래 여백 추가 */
 }
 
-.potCard p {
+.cardBody p {
   font-size: 0.9rem;
   color: #666;
+  margin: 4px 0; /* 위아래 여백 추가 */
 }
 
+.info {
+  margin-top: auto;
+  padding-top: 8px;
+}
+
+/* 토글 스위치 관련 스타일 (기존과 동일) */
 .toggleContainer {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-
 .toggleSwitch {
   position: relative;
   display: inline-block;
   width: 50px;
   height: 28px;
 }
-
 .toggleSwitch input {
   opacity: 0;
   width: 0;
   height: 0;
 }
-
 .toggleSlider {
   position: absolute;
   cursor: pointer;
@@ -150,7 +150,6 @@
   transition: .4s;
   border-radius: 28px;
 }
-
 .toggleSlider:before {
   position: absolute;
   content: "";
@@ -162,11 +161,9 @@
   transition: .4s;
   border-radius: 50%;
 }
-
 .toggleSwitch input:checked + .toggleSlider {
   background-color: #007BFF;
 }
-
 .toggleSwitch input:checked + .toggleSlider:before {
   transform: translateX(22px);
 }
