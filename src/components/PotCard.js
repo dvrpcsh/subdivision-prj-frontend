@@ -13,6 +13,15 @@ const PotCard = ({ pot }) => {
     const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
 
     /**
+     * 1인당 부담 비용을 계산합니다.
+     * pot.price와 pot.maximumHeadcount 값이 유효한 경우에만 계산을 수행하고,
+     * 아닐 경우 0으로 표시하여 오류를 방지합니다.
+     */
+    const costPerPerson = (pot.price && pot.maximumHeadcount > 0)
+        ? Math.floor(pot.price / pot.maximumHeadcount)
+        : 0;
+
+    /**
      * 카드 클릭 시 실행될 핸들러 함수를 새로 만듭니다.
      * 이 함수 안에서 로그인 여부를 확인하고 조건에 따라 다른 페이지로 이동시킵니다.
      */
@@ -45,7 +54,7 @@ const PotCard = ({ pot }) => {
                 {/* 3. 상품명 */}
                 <p className={styles.productName}>{pot.productName}</p>
 
-                {/* [수정 2] 4. 주소 (아이콘과 함께 표시) */}
+                {/* 4. 주소 (아이콘과 함께 표시) */}
                 {/* pot 객체에 address 필드가 있을 경우에만 이 부분을 렌더링합니다. */}
                 {pot.address && (
                     <p className={styles.address}>
@@ -53,6 +62,9 @@ const PotCard = ({ pot }) => {
                         {pot.address}
                     </p>
                 )}
+
+                {/* 계산된 1인당 부담 비용을 화면에 표시합니다. */}
+                <p className={styles.cost}>1인당 {costPerPerson.toLocaleString()}원</p>
 
                 {/* 참여 현황과 상태 배지 */}
                 <p className={styles.info}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import KakaoMap from '../components/KakaoMap';
+import PotCard from '../components/PotCard';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
@@ -219,40 +220,16 @@ const MapPage = () => {
                     <p>목록을 불러오는 중...</p>
                 ) : (
                     <ul className={styles.potList}>
-                        {pots.map((pot) => {
-                            const isCompleted = pot.currentHeadcount >= pot.maximumHeadcount;
-                            return (
-                                //li 태그에 onMouseOver와 onMouseOut 이벤트를 추가합니다.
-                                <li
-                                    key={pot.potId}
-                                    className={styles.potCard}
-                                    onClick={() => navigate(`/pots/${pot.potId}`)}
-                                    onMouseOver={() => setHoveredPotId(pot.potId)}
-                                    onMouseOut={() => setHoveredPotId(null)}
-                                >
-                                    <div className={styles.imageContainer}>
-                                        <img src={pot.imageUrl || noImage} alt={pot.productName} className={styles.cardImage} />
-                                    </div>
-                                    <div className={styles.cardBody}>
-                                        <p className={styles.category}>{PotCategory[pot.category] || '기타'}</p>
-                                        <h3 className={styles.title}>{pot.title}</h3>
-                                        <p className={styles.productName}>{pot.productName}</p>
-                                        {pot.address && (
-                                            <p className={styles.address}>
-                                                <FontAwesomeIcon icon={faMapMarkerAlt} className={styles.addressIcon} />
-                                                {pot.address}
-                                            </p>
-                                        )}
-                                        <p className={styles.info}>
-                                            참여: {pot.currentHeadcount} / {pot.maximumHeadcount}
-                                            <span className={`badge ${isCompleted ? 'completed' : 'recruiting'}`}>
-                                                {isCompleted ? '모집완료' : '모집중'}
-                                            </span>
-                                        </p>
-                                    </div>
-                                </li>
-                            );
-                        })}
+                        {pots.map((pot) => (
+                            // li 태그로 감싸서 마우스 오버 이벤트를 유지합니다.
+                            <li
+                                key={pot.potId}
+                                onMouseOver={() => setHoveredPotId(pot.potId)}
+                                onMouseOut={() => setHoveredPotId(null)}
+                            >
+                                <PotCard pot={pot} />
+                            </li>
+                        ))}
                     </ul>
                 )}
             </div>
