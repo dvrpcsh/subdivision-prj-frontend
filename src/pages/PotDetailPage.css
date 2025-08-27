@@ -1,0 +1,169 @@
+/* PotDetailPage.css */
+
+.pot-detail-container {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 40px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* 2개의 동일한 너비의 열 */
+  gap: 40px;
+}
+
+/* --- 좌측 영역 --- */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pot-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #f0f0f0;
+}
+
+.pot-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pot-map-wrapper {
+  width: 100%;
+  height: 250px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eee;
+}
+
+/* --- 우측 영역 --- */
+.right-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.pot-header {
+  border-bottom: 1px solid #eee;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+
+.pot-category {
+  display: inline-block;
+  background-color: #eaf5ff;
+  color: #3498db;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 15px;
+}
+
+.pot-title {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  color: #333;
+}
+
+.creator-info {
+  font-size: 16px;
+  color: #888;
+  margin-top: 10px;
+}
+
+.pot-info-section {
+  margin-bottom: 25px;
+}
+
+.pot-info-section h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border-left: 4px solid #3498db;
+  padding-left: 10px;
+}
+
+.pot-info-section p {
+  font-size: 16px;
+  color: #555;
+  line-height: 1.6;
+  margin: 8px 0;
+}
+
+.pot-content {
+  background-color: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  white-space: pre-wrap; /* 줄바꿈을 그대로 표시 */
+}
+
+.participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.participant-tag {
+  background-color: #f0f0f0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+/* --- 액션 버튼 영역 --- */
+.action-buttons {
+  margin-top: auto; /* 버튼을 항상 맨 아래에 위치시킴 */
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  display: flex;
+  gap: 15px;
+}
+
+.join-button, .leave-button, .edit-button, .delete-button {
+  flex-grow: 1;
+  padding: 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.join-button { background-color: #2ecc71; color: white; }
+.join-button:hover { background-color: #27ae60; }
+.join-button.disabled { background-color: #bdc3c7; cursor: not-allowed; }
+
+.leave-button { background-color: #f39c12; color: white; }
+.leave-button:hover { background-color: #e67e22; }
+
+.edit-button { background-color: #3498db; color: white; }
+.edit-button:hover { background-color: #2980b9; }
+
+.delete-button { background-color: #e74c3c; color: white; }
+.delete-button:hover { background-color: #c0392b; }
+
+/* 로딩 및 에러 메시지 */
+.page-loading, .page-error {
+  text-align: center;
+  padding: 50px;
+  font-size: 18px;
+  color: #888;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
