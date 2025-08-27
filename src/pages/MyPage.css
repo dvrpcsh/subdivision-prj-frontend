@@ -1,0 +1,143 @@
+/* MyPage.css */
+
+.mypage-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 20px;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* --- 프로필 카드 --- */
+.profile-card {
+  background: #ffffff;
+  padding: 30px 40px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.07);
+  margin-bottom: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.profile-card .profile-info {
+  flex-grow: 1;
+}
+
+.profile-card .profile-greeting {
+  font-size: 16px;
+  color: #888;
+}
+
+.profile-card .nickname-display,
+.profile-card .nickname-edit-form {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-top: 5px;
+}
+
+.profile-card .nickname {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.profile-card .email {
+  font-size: 16px;
+  color: #555;
+  margin-top: 8px;
+}
+
+.profile-card .edit-btn,
+.profile-card .save-btn,
+.profile-card .cancel-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.profile-card .edit-btn { background-color: #f0f0f0; color: #555; }
+.profile-card .edit-btn:hover { background-color: #e0e0e0; }
+
+.profile-card .nickname-input {
+  padding: 8px 12px;
+  font-size: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 250px;
+}
+
+.profile-card .save-btn { background-color: #3498db; color: white; }
+.profile-card .save-btn:hover { background-color: #2980b9; }
+
+.profile-card .cancel-btn { background-color: transparent; color: #888; }
+.profile-card .cancel-btn:hover { background-color: #f0f0f0; }
+
+
+/* --- 탭 메뉴 --- */
+.pot-tabs {
+  display: flex;
+  border-bottom: 2px solid #eee;
+  margin-bottom: 30px;
+}
+
+.pot-tabs .tab-btn {
+  padding: 15px 30px;
+  border: none;
+  background-color: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.pot-tabs .tab-btn::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #3498db;
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.pot-tabs .tab-btn.active {
+  color: #3498db;
+}
+
+.pot-tabs .tab-btn.active::after {
+  transform: scaleX(1);
+}
+
+
+/* --- 팟 목록 그리드 --- */
+.pot-list-container {
+  min-height: 200px;
+}
+
+.pot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
+.pot-grid .empty-message {
+  text-align: center;
+  padding: 50px;
+  color: #888;
+  font-size: 16px;
+  grid-column: 1 / -1;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
