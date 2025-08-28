@@ -1,6 +1,7 @@
 // src/context/AuthContext.js
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
+import api from '../api';
 
 export const AuthContext = createContext();
 
@@ -13,9 +14,7 @@ export const AuthProvider = ({ children }) => {
             const token = localStorage.getItem('jwt');
             if (token) {
                 try {
-                    const response = await axios.get('http://localhost:8080/api/users/me', {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const response = await api.get('/api/users/me');
                     setCurrentUser(response.data);
                 } catch (error) {
                     console.error("사용자 정보 인증 실패", error);
@@ -30,12 +29,10 @@ export const AuthProvider = ({ children }) => {
     const login = async (token) => {
         localStorage.setItem('jwt', token);
         try {
-            const response = await axios.get('http://localhost:8080/api/users/me', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await api.get('/api/users/me');
             // 1. 서버에서 받아온 사용자 정보로 상태를 업데이트합니다.
             setCurrentUser(response.data);
-            // 2. [핵심 수정] 성공했다는 신호로 사용자 데이터를 반환합니다.
+            // 2. 성공했다는 신호로 사용자 데이터를 반환합니다.
             return response.data;
         } catch (error) {
             console.error("로그인 후 사용자 정보 조회에 실패했습니다.", error);

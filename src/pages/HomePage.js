@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
 import PotCard from '../components/PotCard';
 import { PotCategory } from '../constants/categories';
 import { useNavigate } from 'react-router-dom';
@@ -7,6 +6,7 @@ import { AuthContext } from '../context/AuthContext';
 import styles from './HomePage.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch } from '@fortawesome/free-solid-svg-icons';
+import api from '../api';
 
 const HomePage = () => {
     const [pots, setPots] = useState([]);
@@ -61,7 +61,7 @@ const HomePage = () => {
 
                 console.log("API 요청 파라미터:", params);
 
-                const response = await axios.get('http://localhost:8080/api/pots/search', { params });
+                const response = await api.get('/api/pots/search', { params });
 
                 setPots(response.data?.content || []);
                 setTotalPages(response.data?.totalPages || 0);

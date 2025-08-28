@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
 import '../components/PotStatusBadge.css';
@@ -27,10 +27,7 @@ const PotDetailPage = () => {
     //페이지가 열람될 때 한 번만 API를 호출합니다.
     const fetchPotDetails = async () => {
         try {
-            const token = localStorage.getItem('jwt');
-            const response = await axios.get(`http://localhost:8080/api/pots/${potId}`, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            const response = await api.get(`/api/pots/${potId}`);
             setPot(response.data);
         } catch (err) {
             setError('게시물을 불러오는 데 실패했습니다.');
@@ -54,10 +51,7 @@ const PotDetailPage = () => {
     const handleDelete = async () => {
         if (window.confirm('정말로 이 팟을 삭제하시겠습니까?')) {
             try {
-                const token = localStorage.getItem('jwt');
-                await axios.delete(`http://localhost:8080/api/pots/${potId}`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                await api.delete(`/api/pots/${potId}`);
                 alert('팟이 삭제되었습니다.');
                 navigate('/map'); // 메인 페이지로 이동
             } catch (err) {
@@ -76,10 +70,7 @@ const PotDetailPage = () => {
     //팟 참여 핸들러
     const handleJoin = async () => {
         try {
-            const token = localStorage.getItem('jwt');
-            await axios.post(`http://localhost:8080/api/pots/${potId}/join`, {}, {
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
+            await api.post(`/api/pots/${potId}/join`);
             alert('팟 참여가 완료되었습니다.');
             fetchPotDetails(); // 참여 후 최신 정보로 갱신
         } catch (err) {
@@ -91,10 +82,7 @@ const PotDetailPage = () => {
     const handleLeave = async () => {
         if (window.confirm('정말로 팟 참여를 취소하시겠습니까?')) {
             try {
-                const token = localStorage.getItem('jwt');
-                await axios.delete(`http://localhost:8080/api/pots/${potId}/leave`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                await api.delete(`/api/pots/${potId}/leave`);
                 alert('팟 참여를 취소했습니다.');
                 fetchPotDetails(); // 취소 후 최신 정보로 갱신
             } catch (err) {

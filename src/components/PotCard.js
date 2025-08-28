@@ -23,20 +23,11 @@ const PotCard = ({ pot }) => {
 
     /**
      * 카드 클릭 시 실행될 핸들러 함수를 새로 만듭니다.
-     * 이 함수 안에서 로그인 여부를 확인하고 조건에 따라 다른 페이지로 이동시킵니다.
+     * App.js에 설정된 PrivateRoute가 로그인 여부를 확인하고
+     * 필요하면 로그인 페이지로 알아서 보내줍니다.
      */
     const handleCardClick = () => {
-        // 로컬 스토리지에서 'jwt' 토큰을 가져옵니다.
-        const token = localStorage.getItem('jwt');
-
-        if (token) {
-            // 토큰이 있으면 (로그인 상태), 상세 페이지로 이동합니다.
-            navigate(`/pots/${pot.potId}`);
-        } else {
-            // 토큰이 없으면 (로그인 안 한 상태), 알림을 띄우고 로그인 페이지로 이동합니다.
-            alert('로그인이 필요한 서비스입니다.');
-            navigate('/login');
-        }
+        navigate(`/pots/${pot.potId}`);
     };
 
     return (

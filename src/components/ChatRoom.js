@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import './ChatRoom.css';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
-import axios from 'axios';
+import api from '../api';
 
 //팟 상세 페이지로부터 potId를 props로 받습니다.
 const ChatRoom = ({ potId }) => {
@@ -43,10 +43,7 @@ const ChatRoom = ({ potId }) => {
 
         const fetchChatHistory = async () => {
             try {
-                const token = localStorage.getItem('jwt');
-                const response = await axios.get(`http://localhost:8080/api/pots/${potId}/chat/history`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
+                const response = await api.get(`/api/pots/${potId}/chat/history`);
                 const history = response.data.map(msg => ({
                     type: msg.type || 'TALK',
                     sender: msg.sender,
@@ -62,7 +59,7 @@ const ChatRoom = ({ potId }) => {
         const connectWebSocket = () => {
             if (!currentUser?.nickname) return;
 
-            const socket = new SockJS('http://localhost:8080/ws-chat');
+            const socket = new SockJS(`${process.env.REACT_APP_API_URL}/ws-chat`);
             const stompClient = new Client({
                 webSocketFactory: () => socket,
                 reconnectDelay: 5000,

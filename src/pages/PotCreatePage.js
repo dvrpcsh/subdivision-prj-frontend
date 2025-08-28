@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import './PotCreatePage.css';
@@ -148,7 +148,7 @@ const PotCreatePage = () => {
 
             try {
                 const token = localStorage.getItem('jwt');
-                const imageRes = await axios.post('http://localhost:8080/api/images/upload', formData, {
+                const imageRes = await api.post('/api/images/upload', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                         'Authorization': `Bearer ${token}`
@@ -180,7 +180,7 @@ const PotCreatePage = () => {
                 detailAddress
             };
 
-            const response = await axios.post('http://localhost:8080/api/pots', potData, {
+            const response = await api.post('/api/pots', potData, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

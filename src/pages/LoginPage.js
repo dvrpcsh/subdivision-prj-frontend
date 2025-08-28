@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import styles from './LoginPage.module.css';
@@ -23,7 +23,7 @@ const LoginPage = () => {
 
         try {
             // 1. 서버에 이메일과 비밀번호를 보내 로그인 요청을 합니다.
-            const response = await axios.post('http://localhost:8080/api/auth/login', {
+            const response = await api.post('/api/auth/login', {
                 email: email,
                 password: password
             });

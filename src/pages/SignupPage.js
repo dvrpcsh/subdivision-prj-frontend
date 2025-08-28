@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { useNavigate } from 'react-router-dom';
 import styles from './SignupPage.module.css';
 
@@ -59,7 +59,7 @@ const SignupPage = () => {
 
         try{
             //2.닉네임 중복 확인 API 호출
-            const nicknameRes = await axios.get(`http://localhost:8080/api/auth/check-nickname?nickname=${nickname}`);
+            const nicknameRes = await api.get(`/api/auth/check-nickname?nickname=${nickname}`);
             if(nicknameRes.data.isDuplicate) {
                 setError('이미 사용 중인 닉네임입니다.');
                 alert('이미 사용 중인 닉네임입니다.');
@@ -68,7 +68,7 @@ const SignupPage = () => {
             }
 
             //3.이메일 중복 확인 API 호출
-            const emailRes = await axios.get(`http://localhost:8080/api/auth/check-email?email=${email}`);
+            const emailRes = await api.get(`/api/auth/check-email?email=${email}`);
             if(emailRes.data.isDuplicate) {
                 setError('이미 가입된 이메일입니다.');
                 alert('이미 가입된 이메일입니다.');
@@ -78,7 +78,7 @@ const SignupPage = () => {
 
 
             //4.백엔드에 회원가입 API 호출
-            await axios.post('http://localhost:8080/api/auth/signup', {
+            await api.post('/api/auth/signup', {
                 email,
                 password,
                 nickname
@@ -117,7 +117,7 @@ const SignupPage = () => {
         setError('');
 
         try {
-            await axios.post('http://localhost:8080/api/auth/send-verification-code', {email});
+            await api.post('/api/auth/send-verification-code', {email});
             setIsCodeSent(true); //로딩 시작
             setVerificationMessage('인증번호가 발송되었습니다. 메일을 확인해주세요.');
         } catch(err) {
@@ -130,7 +130,7 @@ const SignupPage = () => {
     //인증번호 확인 버튼 클릭 시 실행될 함수
     const handleVerifyCode = async () => {
         try {
-            await axios.post('http://localhost:8080/api/auth/verify-code', { email, code:verificationCode });
+            await api.post('/api/auth/verify-code', { email, code:verificationCode });
             setIsVerified(true);
             setVerificationMessage('인증이 완료되었습니다.');
             setError('');

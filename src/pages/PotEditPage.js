@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../api';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import './PotCreatePage.css'; // 생성 페이지와 동일한 스타일 시트를 사용합니다.
 import { PotCategory } from '../constants/categories';
@@ -27,7 +27,7 @@ const PotEditPage = () => {
         const fetchPotData = async () => {
             try {
                 const token = localStorage.getItem('jwt');
-                const response = await axios.get(`http://localhost:8080/api/pots/${potId}`, {
+                const response = await api.get(`/api/pots/${potId}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const fetchedData = response.data;
@@ -118,7 +118,7 @@ const PotEditPage = () => {
             formData.append('image', imageFile);
             try {
                 const token = localStorage.getItem('jwt');
-                const imageRes = await axios.post('http://localhost:8080/api/images/upload', formData, {
+                const imageRes = await api.post('/api/images/upload', formData, {
                     headers: { 'Content-Type': 'multipart/form-data', 'Authorization': `Bearer ${token}` }
                 });
                 finalImageUrl = imageRes.data;
@@ -136,7 +136,7 @@ const PotEditPage = () => {
                 price: parseInt(potData.price, 10),
                 maximumHeadcount: parseInt(potData.maximumHeadcount, 10),
             };
-            await axios.put(`http://localhost:8080/api/pots/${potId}`, dataToSubmit, {
+            await api.put(`/api/pots/${potId}`, dataToSubmit, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             alert('게시물이 성공적으로 수정되었습니다.');

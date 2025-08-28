@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../api';
 import { AuthContext } from '../context/AuthContext';
 import PotCard from '../components/PotCard';
 // [핵심 수정] '.module.css'를 제거하여 일반 CSS 파일로 불러옵니다.
@@ -26,8 +26,8 @@ const MyPage = () => {
             try {
                 const config = { headers: { 'Authorization': `Bearer ${token}` } };
                 const [myPotsRes, joinedPotsRes] = await Promise.all([
-                    axios.get('http://localhost:8080/api/mypage/my-pots', config),
-                    axios.get('http://localhost:8080/api/mypage/joined-pots', config)
+                    api.get('/api/mypage/my-pots', config),
+                    api.get('/api/mypage/joined-pots', config)
                 ]);
                 setMyPots(Array.isArray(myPotsRes.data) ? myPotsRes.data : []);
                 setJoinedPots(Array.isArray(joinedPotsRes.data) ? joinedPotsRes.data : []);
@@ -48,7 +48,7 @@ const MyPage = () => {
             return;
         }
         try {
-            await axios.patch('http://localhost:8080/api/mypage/nickname',
+            await api.patch('/api/mypage/nickname',
                 { nickname: newNickname },
                 { headers: { 'Authorization': `Bearer ${token}` } }
             );

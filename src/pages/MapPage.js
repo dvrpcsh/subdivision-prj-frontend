@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import axios from 'axios';
+import api from '../api';
 import KakaoMap from '../components/KakaoMap';
 import PotCard from '../components/PotCard';
 import { PotCategory } from '../constants/categories';
@@ -131,7 +131,7 @@ const MapPage = () => {
 
                     return;
                 }
-                const response = await axios.get('http://localhost:8080/api/pots/search', {
+                const response = await api.get('/api/pots/search', {
                     params: {
                         lat: location.latitude,
                         lon: location.longitude,
