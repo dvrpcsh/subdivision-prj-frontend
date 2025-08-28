@@ -13,6 +13,10 @@ const ChatRoom = ({ potId }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
     const clientRef = useRef(null);
+    const hasEnteredRef = useRef(false); // 이미 ENTER 메시지를 보냈는지 추적
+
+    // useEffect가 처음 한 번만 실행되었는지 확인하기 위한 '스위치'를 만듭니다.
+    const effectRan = useRef(false);
 
     // 시간을 '오후 5:55'와 같은 형식으로 변환해주는 헬퍼 함수
     const formatTime = (dateString) => {
@@ -25,103 +29,125 @@ const ChatRoom = ({ potId }) => {
         });
     };
 
-    //컴포넌트가 처음 렌더링될 때 웹소켓 연결 및 대화 기록을 불러옵니다.
+    /**
+     * 대화 기록을 불러오는 useEffect
+     * 이 useEffect는 컴포넌트가 처음 마운트될 때 '단 한 번만' 실행되어
+     * 이전 대화 기록을 안정적으로 불러오는 역할에만 집중합니다.
+     */
     useEffect(() => {
-        //대화 기록을 불러오는 함수
+        // 개발 환경이고, 스위치가 아직 켜지지 않았을 때만 아래 로직을 실행합니다.
+        // process.env.NODE_ENV !== 'production'은 개발 환경일 때를 의미합니다.
+        if (process.env.NODE_ENV !== 'production' && effectRan.current === true) {
+            return;
+        }
+
         const fetchChatHistory = async () => {
             try {
                 const token = localStorage.getItem('jwt');
-                const response = await axios.get('http://localhost:8080/api/pots/${potId}/chat/history', {
+                const response = await axios.get(`http://localhost:8080/api/pots/${potId}/chat/history`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                //서버에서 받아온 메시지 형식을 프런트엔드 형식에 맞게 변환합니다.
-                //백엔드 응답 DTO에 type 필드가 없다면 기본값 'TALK' 타입으로 간주
                 const history = response.data.map(msg => ({
-                    type: 'TALK', // 이전 메시지는 모두 'TALK' 타입으로 간주
+                    type: msg.type || 'TALK',
                     sender: msg.sender,
                     message: msg.message,
                     sentAt: msg.sentAt
                 }));
                 setMessages(history);
-            } catch(error) {
+            } catch (error) {
                 console.error("대화 기록을 불러오는 데 실패했습니다.", error);
             }
         };
 
-        //1.대화 기록을 먼저 불러옵니다.
-        fetchChatHistory();
+        const connectWebSocket = () => {
+            if (!currentUser?.nickname) return;
 
-        //2.웹소켓 클라이언트 객체를 저장하기 위한 ref를 생성합니다.
-        if(!clientRef.current) {
-            //SockJS를 사용하여 웹소켓 연결을 생성합니다.
             const socket = new SockJS('http://localhost:8080/ws-chat');
-            //STOMP 클라이언트를 생성합니다.
             const stompClient = new Client({
                 webSocketFactory: () => socket,
-                debug: (str) => {
-                    console.log(str);
-                },
-                reconnectDelay: 5000, //5초마다 재연결시도
+                reconnectDelay: 5000,
             });
 
-            //3.서버에 연결되었을 때 실행될 콜백 함수 설정
             stompClient.onConnect = () => {
-                console.log("WebSocket에 연결되었습니다!");
-
-                //4.특정 팟(채팅방)의 메시지를 구독합니다.
-                //서버는 "/topic/pots/{potId}" 경로로 메시지를 보내줍니다.
                 stompClient.subscribe(`/topic/pots/${potId}`, (message) => {
-                    //새로운 메시지를 받으면, JSON형식으로 변환하여 message 상태에 추가합니다.
                     const receivedMessage = JSON.parse(message.body);
-                    setMessages((prevMessages) => [...prevMessages, {
-                        ...receivedMessage,
-                        sentAt: new Date().toISOString() // 현재 시간을 ISO 형식으로 추가
-                    }]);
+
+                    // ENTER 타입이고 message가 있는 경우 (최초 참여 환영 메시지)
+                    if (receivedMessage.type === 'ENTER' && receivedMessage.message && receivedMessage.message.trim() !== '') {
+                        setMessages((prevMessages) => [...prevMessages, {
+                            ...receivedMessage,
+                            sentAt: receivedMessage.sentAt || new Date().toISOString()
+                        }]);
+                    }
+                    // TALK 메시지는 다른 사용자의 메시지만 화면에 추가
+                    // 내가 보낸 메시지는 이미 낙관적 업데이트로 추가되었으므로 제외
+                    else if (receivedMessage.type === 'TALK' && receivedMessage.sender !== currentUser?.nickname) {
+                        setMessages((prevMessages) => [...prevMessages, {
+                            ...receivedMessage,
+                            sentAt: receivedMessage.sentAt || new Date().toISOString()
+                        }]);
+                    }
                 });
 
-
-                //5.채팅방에 처음 입장했다는 메시지를 서버로 보냅니다.
-                stompClient.publish({
-                    destination: '/app/chat/message',
-                    body: JSON.stringify({
-                        type: 'ENTER',
-                        potId: potId,
-                        sender: currentUser?.nickname,
-                    }),
-                });
+                // 최초 연결 시에만 ENTER 메시지 전송
+                if (!hasEnteredRef.current) {
+                    stompClient.publish({
+                        destination: '/app/chat/message',
+                        body: JSON.stringify({
+                            type: 'ENTER',
+                            potId: potId,
+                            sender: currentUser?.nickname,
+                            message: ''
+                        }),
+                    });
+                    hasEnteredRef.current = true;
+                }
             };
 
-            // STOMP 클라이언트를 활성화(연결 시작)합니다.
             stompClient.activate();
-            // 생성된 클라이언트 객체를 ref에 저장합니다.
             clientRef.current = stompClient;
-        }
-
-        //컴포넌트가 언마운트 될 때 웹소켓 연결을 해제합니다.
-        return () => {
-            if(clientRef.current && clientRef.current.connected) {
-                clientRef.current.deactivate();
-                console.log('WebSocket 연결이 해제되었습니다.');
-            }
         };
-    }, [potId, currentUser?.nickname]); //potId나 닉네임이 바뀔 경우에만 재연결
 
-    //메시지 전송 핸들러(지금은 임시 목록에 추가만 합니다)
+        fetchChatHistory();
+        connectWebSocket();
+
+        // useEffect의 모든 로직이 끝난 후, 스위치를 'ON'으로 바꿔
+        // 다음에 다시 실행되지 않도록 합니다.
+        return () => {
+            if (clientRef.current && clientRef.current.connected) {
+                clientRef.current.deactivate();
+            }
+            effectRan.current = true;
+        };
+    }, [potId, currentUser?.nickname]);
+
+    //메시지 전송 핸들러
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !clientRef.current || !clientRef.current.connected) return;
 
-        // 서버로 메시지를 전송합니다.
+        // 1. 서버로 보낼 메시지 객체를 만듭니다.
+        const messageToSend = {
+            type: 'TALK',
+            potId: potId,
+            sender: currentUser?.nickname,
+            message: newMessage,
+        };
+
+        // 2. 서버로 메시지를 전송합니다.
         clientRef.current.publish({
             destination: '/app/chat/message',
-            body: JSON.stringify({
-                type: 'TALK',
-                potId: potId,
-                sender: currentUser?.nickname,
-                message: newMessage,
-            }),
+            body: JSON.stringify(messageToSend),
         });
 
+        // 3. (낙관적 업데이트) 내 화면의 메시지 목록에 방금 보낸 메시지를 즉시 추가합니다.
+        //    sentAt(보낸 시간)을 함께 추가하여 화면에 바로 표시될 수 있도록 합니다.
+        setMessages((prevMessages) => [...prevMessages, {
+            ...messageToSend,
+            sentAt: new Date().toISOString()
+        }]);
+
+        // 4. 입력창을 비웁니다.
         setNewMessage('');
     };
 
@@ -139,8 +165,10 @@ const ChatRoom = ({ potId }) => {
             <div className="chat-body">
                 <ul className="message-list">
                     {messages.map((msg, index) => {
-                        // [핵심 1] 메시지 타입에 따라 다른 JSX를 렌더링합니다.
+                        //메시지 타입에 따라 다른 JSX를 렌더링합니다.
                         if (msg.type === 'ENTER') {
+                            //메시지 내용이 있을 때만 시스템 메시지를 표시합니다.
+                            if (!msg.message || msg.message.trim() === '') return null;
                             return (
                                 <li key={index} className="system-message">
                                     <span>{msg.message}</span>
@@ -152,7 +180,7 @@ const ChatRoom = ({ potId }) => {
                                 <span className="sender">{msg.sender}</span>
                                 <div className="message-content">
                                     <div className="message-bubble"><p>{msg.message}</p></div>
-                                    {/* [핵심 2] 메시지 옆에 시간을 표시합니다. */}
+                                    {/* 메시지 옆에 시간을 표시합니다. */}
                                     <span className="timestamp">{formatTime(msg.sentAt)}</span>
                                 </div>
                             </li>

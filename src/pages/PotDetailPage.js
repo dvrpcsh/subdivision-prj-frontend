@@ -59,7 +59,7 @@ const PotDetailPage = () => {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 alert('팟이 삭제되었습니다.');
-                navigate('/'); // 메인 페이지로 이동
+                navigate('/map'); // 메인 페이지로 이동
             } catch (err) {
                 alert('삭제에 실패했습니다.');
                 console.error(err);
@@ -117,7 +117,7 @@ const PotDetailPage = () => {
     const contentWithBreaks = pot.content.replace(/\n/g, '<br />');
 
     //팟에 참여했는지 여부를 나타내는 변수
-    const isJoined = pot.participants?.some(p => p.userId === currentUser?.userId);
+    const isJoined = currentUser && pot.members?.some(p => p.nickname === currentUser.nickname);
 
     //성공적으로 데이터를 받아왔을 때 상세 정보 표시
     return (
@@ -165,8 +165,8 @@ const PotDetailPage = () => {
                         <div className="action-buttons">
                             {isOwner ? (
                                 <>
-                                    {/* 채팅방 보기 버튼을 추가하고, isJoined 로직을 통합합니다. */}
-                                    <button onClick={() => setIsChatOpen(true)} className="chat-button">채팅방 보기</button>
+                                    {/* 채팅방 참여 버튼을 추가하고, isJoined 로직을 통합합니다. */}
+                                    <button onClick={() => setIsChatOpen(true)} className="chat-button">채팅방 참여</button>
                                     <button onClick={handleEdit} className="edit-button">수정하기</button>
                                     <button onClick={handleDelete} className="delete-button">삭제하기</button>
                                 </>
