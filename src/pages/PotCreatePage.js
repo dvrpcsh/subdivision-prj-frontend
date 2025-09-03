@@ -1,176 +1,155 @@
+/**
+ * PotCreatePage.js
+ * * 새로운 팟(공동구매)을 생성하는 페이지입니다.
+ * - 카카오맵 API를 사용하여 위치를 지정합니다.
+ * - Daum 우편번호 서비스를 통해 주소를 검색합니다.
+ * - 이미지 파일을 선택하여 S3에 업로드하고, 그 경로를 포함하여 팟 생성을 요청합니다.
+ */
 import React, { useState, useEffect } from 'react';
 import { Map, MapMarker } from 'react-kakao-maps-sdk';
-import api from '../api';
+import api from '../api'; // 모든 API 요청을 처리하는 Axios 인스턴스
 import { useNavigate } from 'react-router-dom';
 import { useDaumPostcodePopup } from 'react-daum-postcode';
 import './PotCreatePage.css';
 import { PotCategory } from '../constants/categories';
 
 const PotCreatePage = () => {
+    // 폼의 각 입력 필드에 대한 상태(State)
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [productName, setProductName] = useState('');
-    const [maximumHeadcount, setMaximumHeadcount] = useState(2);
+    const [maximumHeadcount, setMaximumHeadcount] = useState(2); // 최소 인원은 2명부터 시작
     const [price, setPrice] = useState('');
-    //이미지 파일과 미리보기 URL을 위한 state 추가
-    const [imageFile, setImageFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState('');
-    const [category, setCategory] = useState('FOOD');
+    const [category, setCategory] = useState('FOOD'); // 기본 카테고리 설정
 
-    //위치 및 주소찾기
-    const openPostcodePopup = useDaumPostcodePopup();
-    const [location, setLocation] = useState(null);
-    const [address, setAddress] = useState('');
-    const [detailAddress, setDetailAddress] = useState('');
-    const [isPostcodeOpen, setIsPostcodeOpen] = useState(false);
-    const navigate = useNavigate();
+    // 이미지 파일과 이미지 미리보기를 위한 상태
+    const [imageFile, setImageFile] = useState(null); // 사용자가 선택한 실제 이미지 파일
+    const [previewUrl, setPreviewUrl] = useState(''); // 이미지 선택 시 보여줄 미리보기 URL
 
-    //지도에 표시할 마커의 위치를 위한 state
-    const [markerPosition, setMarkerPosition] = useState(null);
+    // 위치 정보(위도, 경도) 및 주소 관련 상태
+    const openPostcodePopup = useDaumPostcodePopup(); // Daum 우편번호 팝업을 열기 위한 Hook
+    const [location, setLocation] = useState(null); // 위도(lat), 경도(lng)를 저장
+    const [address, setAddress] = useState(''); // 주소 검색 또는 지도 클릭으로 얻은 주소
+    const [detailAddress, setDetailAddress] = useState(''); // 사용자가 직접 입력하는 상세주소
+    const [markerPosition, setMarkerPosition] = useState(null); // 지도에 표시할 마커의 위치
 
-    //컴포넌트가 처음 로딩될 때 사용자의 현재 위치를 가져와 지도를 초기화합니다.
+    const navigate = useNavigate(); // 페이지 이동을 위한 Hook
+
+    // 컴포넌트가 처음 렌더링될 때, 사용자의 현재 위치를 기반으로 지도의 기본 위치를 설정합니다.
     useEffect(() => {
-        navigator.geolocation.getCurrentPosition((position) => {
-            const { latitude, longitude } = position.coords;
-            const userCoords = { lat: latitude, lng: longitude };
-            setLocation(userCoords);
-            setMarkerPosition(userCoords);
-        });
-    }, []);
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const { latitude, longitude } = position.coords;
+                const userCoords = { lat: latitude, lng: longitude };
+                setLocation(userCoords);
+                setMarkerPosition(userCoords);
+            });
+        }
+    }, []); // 빈 배열을 전달하여 컴포넌트가 마운트될 때 한 번만 실행되도록 합니다.
 
-    //총 가격과 인원수에 따라 1인당 부담 비용을 실시간으로 계산합니다.
+    // 총 가격과 인원수에 따라 1인당 부담 비용을 실시간으로 계산합니다.
     const costPerPerson = (price && maximumHeadcount > 0)
-        ? Math.floor(price / maximumHeadcount)
+        ? Math.floor(price / maximumHeadcount) // 소수점 이하는 버립니다.
         : 0;
 
-    //이미지 파일 선택 시 실행 될 핸들러
+    // '이미지 선택' 버튼을 통해 사용자가 파일을 선택했을 때 실행되는 함수입니다.
     const handleImageChange = (e) => {
         const file = e.target.files[0];
-        if(file) {
-            setImageFile(file);
-            //FileReader를 사용하거나 URL.createObjectURL을 사용하여 미리보기 생성
+        if (file) {
+            setImageFile(file); // 선택된 파일을 상태에 저장
+            // FileReader API를 사용하여 이미지 파일의 내용을 읽고,
+            // 데이터 URL로 변환하여 이미지 미리보기를 생성합니다.
             const reader = new FileReader();
             reader.onloadend = () => {
                 setPreviewUrl(reader.result);
-            }
+            };
             reader.readAsDataURL(file);
         }
     };
 
-    //주소찾기 팝업을 열고 닫는 핸들러
-    const handleTogglePostcode = () => {
-        setIsPostcodeOpen(!isPostcodeOpen);
-    };
-
-    //'주소 검색' 버튼 클릭 시 실행될 핸들러
+    // '주소 검색' 버튼 클릭 시 Daum 우편번호 팝업을 엽니다.
     const handleAddressSearch = () => {
         openPostcodePopup({ onComplete: handleCompletePostcode });
-    }
+    };
 
-    //주소찾기 완료 후 실행될 핸들러
+    // 주소 검색이 완료되면 호출되는 콜백 함수입니다.
     const handleCompletePostcode = (data) => {
-        let fullAddress = data.address;
-        let extraAddress = '';
-
-        if(data.addressType === 'R') {
-            if(data.bname !== '') {
-                extraAddress += data.bname;
-            }
-            if(data.buildingName !== '') {
-                extraAddress += (extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName);
-            }
-            fullAddress += (extraAddress !== '' ? ` (${extraAddress})` : '');
-        }
-
-        setAddress(fullAddress); //주소 state 업데이트
-
-        //주소를 좌표로 변환
+        setAddress(data.address); // 선택된 주소를 상태에 저장
+        // 주소를 좌표로 변환하기 위해 카카오맵의 Geocoder 서비스를 사용합니다.
         const geocoder = new window.kakao.maps.services.Geocoder();
-        geocoder.addressSearch(fullAddress, (result, status) => {
-            if(status === window.kakao.maps.services.Status.OK) {
-                const newCoords = { lat: parseFloat(result[0].y), lng: parseFloat(result[0].x)};
-                setLocation(newCoords); //좌표 state 업데이트
+        geocoder.addressSearch(data.address, (result, status) => {
+            if (status === window.kakao.maps.services.Status.OK) {
+                const newCoords = { lat: parseFloat(result[0].y), lng: parseFloat(result[0].x) };
+                setLocation(newCoords); // 변환된 좌표를 지도 중심과 마커 위치로 설정
+                setMarkerPosition(newCoords);
             }
         });
+    };
 
-        setIsPostcodeOpen(false); //팝업 닫기
-    }
-
-    //지도를 클릭했을 때 실행될 핸들러
+    // 지도를 클릭했을 때 실행되는 함수입니다.
     const handleMapClick = (_map, mouseEvent) => {
         const latlng = mouseEvent.latLng;
         const newCoords = { lat: latlng.getLat(), lng: latlng.getLng() };
-
-        //클릭한 위치의 좌표를 location과 markerPosition state에 업데이트합니다.
-        setLocation(newCoords);
+        setLocation(newCoords); // 클릭된 위치의 좌표를 저장
         setMarkerPosition(newCoords);
-
-        //카카오맵 지오코더 API를 사용해 좌표를 주소로 변환합니다.
+        // Geocoder를 사용하여 클릭된 좌표를 주소로 변환하고, 주소 입력창에 표시합니다.
         const geocoder = new window.kakao.maps.services.Geocoder();
         geocoder.coord2Address(newCoords.lng, newCoords.lat, (result, status) => {
-            if(status === window.kakao.maps.services.Status.OK) {
-                //도로명 주소가 있으면 도로명 주소를, 없으면 지번 주소를 사용합니다.
+            if (status === window.kakao.maps.services.Status.OK) {
                 const addressName = result[0].road_address
-                ? result[0].road_address.address_name
-                : result[0].address.address_name;
-
-                //변환된 주소를 address state에 업데이트하여 입력창에 표시합니다.
+                    ? result[0].road_address.address_name
+                    : result[0].address.address_name;
                 setAddress(addressName);
             }
-        })
+        });
+    };
 
-    }
-
-    //폼 제출 시 실행 될 핸들러
+    /**
+     * '작성 완료' 버튼 클릭 시 실행되는 메인 함수입니다.
+     * 1. (이미지가 있다면) 먼저 이미지를 S3에 업로드합니다.
+     * 2. 업로드 성공 시 받은 이미지 URL과 함께 나머지 폼 데이터를 서버에 보내 팟을 생성합니다.
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        //주소가 입력되었는지 유효성 검사
-        if(!location) {
-            alert('주소를 입력해주세요.');
-
+        if (!location || !address) {
+            alert('팟 생성 위치를 지정해주세요.');
             return;
         }
 
-        //가격이 입력되었는지 유효성 검사
-        if(!price) {
-            alert('가격을 입력해주세요.');
+        let imageUrl = ''; // 팟 생성 요청에 포함될 최종 이미지 URL
 
-            return;
-        }
-
-        let imageUrl = '';
-
-        //이미지가 선택되었으면 S3에 먼저 업로드
-        if(imageFile) {
+        // --- 1단계: 이미지 업로드 (이미지 파일이 선택된 경우에만 실행) ---
+        if (imageFile) {
             const formData = new FormData();
             formData.append('image', imageFile);
 
             try {
-                const token = localStorage.getItem('jwt');
-                const imageRes = await api.post('/api/images/upload', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-                imageUrl = imageRes.data; //응답으로 받은 S3 URL
-            } catch(err) {
-                console.error('Image upload failed:', err);
-                alert('이미지 업로드에 실패했습니다.');
+                // `api.post`를 호출합니다. `api.js`의 인터셉터가 자동으로 Authorization 헤더를 추가해줍니다.
+                // 💡 [핵심] 헤더를 직접 설정하지 않습니다.
+                // 'Content-Type': 'multipart/form-data' 헤더는 브라우저가 FormData를 보낼 때
+                // 고유한 boundary 값과 함께 자동으로 생성해주므로, 절대 직접 설정하면 안 됩니다.
+                const imageRes = await api.post('/api/images/upload', formData);
+                
+                // 서버로부터 응답받은 이미지 경로(Key)를 imageUrl 변수에 저장합니다.
+                imageUrl = imageRes.data; 
 
-                return;
+            } catch (err) {
+                // 이미지 업로드 API 호출이 실패한 경우 (e.g., 토큰 만료 등)
+                console.error('Image upload failed:', err);
+                // 서버에서 보낸 에러 메시지가 있다면 보여주고, 없다면 기본 메시지를 보여줍니다.
+                alert(err.response?.data?.message || '이미지 업로드에 실패했습니다.');
+                return; // 팟 생성을 중단합니다.
             }
         }
 
-        //이미지 URL과 함께 팟 생성 API 호출
+        // --- 2단계: 팟 생성 (이미지 업로드 성공 후 또는 이미지가 없는 경우 실행) ---
         try {
-            const token = localStorage.getItem('jwt');
             const potData = {
                 title,
                 content,
                 productName,
-                imageUrl,
+                imageUrl, // 1단계에서 받은 URL 또는 빈 문자열
                 maximumHeadcount: parseInt(maximumHeadcount, 10),
                 price: parseInt(price, 10),
                 latitude: location.lat,
@@ -179,26 +158,26 @@ const PotCreatePage = () => {
                 address,
                 detailAddress
             };
+            
+            // `api.post`를 호출합니다. `api.js`의 인터셉터가 자동으로 Authorization 헤더를 추가해줍니다.
+            const response = await api.post('/api/pots', potData);
 
-            const response = await api.post('/api/pots', potData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-
-            //생성이 성공하면 해당 팟의 상세 페이지로 이동
+            // 생성이 성공하면, 응답으로 받은 새로운 팟의 ID를 이용해 상세 페이지로 이동합니다.
             const newPotId = response.data.potId;
             navigate(`/pots/${newPotId}`);
-        } catch(err) {
+
+        } catch (err) {
             console.error('Pot creation failed:', err);
-            alert('게시물 생성에 실패했습니다.');
+            alert(err.response?.data?.message || '게시물 생성에 실패했습니다.');
         }
     };
 
+    // JSX 렌더링 부분
     return (
         <div className="create-pot-container">
             <h2>새로운 팟 만들기</h2>
             <form onSubmit={handleSubmit} className="pot-form">
+                {/* 각 입력 필드와 UI 요소들 */}
                 <div className="form-group">
                     <label htmlFor="title">제목</label>
                     <input id="title" type="text" value={title} onChange={(e) => setTitle(e.target.value)} required />
@@ -214,24 +193,15 @@ const PotCreatePage = () => {
                     <textarea id="content" value={content} onChange={(e) => setContent(e.target.value)} required />
                 </div>
 
-                {/* 카테고리 선택 드롭다운 */}
                 <div className="form-group">
                     <label htmlFor="category">카테고리</label>
-                    <select
-                        id="category"
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        required
-                    >
+                    <select id="category" value={category} onChange={(e) => setCategory(e.target.value)} required>
                         {Object.entries(PotCategory).map(([key, displayName]) => (
-                            <option key={key} value={key}>
-                                {displayName}
-                            </option>
+                            <option key={key} value={key}>{displayName}</option>
                         ))}
                     </select>
                 </div>
 
-                {/* 가격 및 인원 설정 섹션*/}
                 <div className="form-group price-section">
                     <div className="price-input">
                         <label htmlFor="price">총 가격</label>
@@ -246,8 +216,7 @@ const PotCreatePage = () => {
                         <p>{costPerPerson.toLocaleString()} 원</p>
                     </div>
                 </div>
-
-                {/* 주소 관련 UI */}
+                
                 <div className="form-group">
                     <label>팟 생성 위치</label>
                     <div className="address-search-bar">
@@ -257,29 +226,20 @@ const PotCreatePage = () => {
                     <input type="text" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} placeholder="상세주소 입력" />
                 </div>
 
-                {/*위치 선택 지도*/}
                 <div className="form-group">
-                    <p style={{fontSize: '14px', color: '#666'}}>또는 지도에서 직접 위치를 클릭하세요.</p>
-                    {/* 지도가 로딩되었을 때만 (location state가 있을 때만) Map을 렌더링합니다. */}
+                    <p style={{ fontSize: '14px', color: '#666' }}>또는 지도에서 직접 위치를 클릭하세요.</p>
                     {location && (
                         <div style={{ width: '100%', height: '400px' }}>
-                            <Map
-                                center={location}
-                                style={{ width: '100%', height: '100%' }}
-                                level={3}
-                                onClick={handleMapClick} // 지도에 클릭 이벤트 핸들러를 연결합니다.
-                            >
-                                {/* 클릭한 위치에 마커를 표시합니다. */}
+                            <Map center={location} style={{ width: '100%', height: '100%' }} level={3} onClick={handleMapClick}>
                                 {markerPosition && <MapMarker position={markerPosition} />}
                             </Map>
                         </div>
                     )}
                 </div>
 
-                {/* 이미지 선택 UI */}
                 <div className="form-group">
                     <label htmlFor="image">상품 이미지 (선택)</label>
-                    <input id="image" type="file" accept="image/*" onChange={(e) => handleImageChange(e)} />
+                    <input id="image" type="file" accept="image/*" onChange={handleImageChange} />
                 </div>
                 {previewUrl && (<div className="preview-container"><img src={previewUrl} alt="Preview" className="preview-image" /></div>)}
 
@@ -290,3 +250,4 @@ const PotCreatePage = () => {
 };
 
 export default PotCreatePage;
+
