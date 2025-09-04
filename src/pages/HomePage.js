@@ -51,7 +51,7 @@ const HomePage = () => {
                 const params = {
                     lat: 35.179554,
                     lon: 129.075642,
-                    distance: 50,
+                    distance: 500,
                     page: page,
                     size: 8,
                     keyword: searchTerm || null,
