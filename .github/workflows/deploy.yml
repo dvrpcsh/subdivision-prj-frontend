@@ -70,8 +70,8 @@ jobs:
 
       # 2-3. S3 버킷에 빌드 파일 업로드
       - name: Upload to S3
-        run: aws s3 sync ./build s3://여기에-S3-버킷이름을-입력하세요 --delete
+        run: aws s3 sync ./build s3://www.dongne-gonggu.shop --delete
 
       # 2-4. CloudFront 캐시 무효화
       - name: Invalidate CloudFront Cache
-        run: aws cloudfront create-invalidation --distribution-id 여기에-CloudFront-ID를-입력하세요 --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id EQYNESYWQOL6A --paths "/*"
