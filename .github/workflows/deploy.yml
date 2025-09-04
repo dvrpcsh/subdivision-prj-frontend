@@ -5,7 +5,7 @@ name: Frontend CI/CD with AWS S3 and CloudFront
 
 on:
   push:
-    branches: [ "main" ] # 프론트엔드 리포지토리의 기본 브랜치 이름으로 변경하세요. (예: main, master)
+    branches: [ "master" ] # 프론트엔드 리포지토리의 기본 브랜치 이름으로 변경하세요. (예: main, master)
 
 permissions:
   contents: read
