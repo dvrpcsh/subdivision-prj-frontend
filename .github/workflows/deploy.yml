@@ -74,4 +74,4 @@ jobs:
 
       # 2-4. CloudFront 캐시 무효화
       - name: Invalidate CloudFront Cache
-        run: aws cloudfront create-invalidation --distribution-id EQYNESYWQOL6A --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id EQYNES1WQOL6A --paths "/*"
