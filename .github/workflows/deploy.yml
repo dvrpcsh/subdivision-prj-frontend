@@ -1,0 +1,77 @@
+# ===================================================================
+# GitHub Actions 워크플로우: React/Vue 빌드, S3 업로드, CloudFront 무효화
+# ===================================================================
+name: Frontend CI/CD with AWS S3 and CloudFront
+
+on:
+  push:
+    branches: [ "main" ] # 프론트엔드 리포지토리의 기본 브랜치 이름으로 변경하세요. (예: main, master)
+
+permissions:
+  contents: read
+
+jobs:
+  # ===================================================================
+  # 1. 빌드 작업
+  # - 백엔드의 'build-and-push-image' 작업에 해당합니다.
+  # - 정적 파일을 빌드하고, 그 결과물을 다음 'deploy' 작업에 전달하기 위해 'artifact'로 만듭니다.
+  # ===================================================================
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1-1. 리포지토리 코드 체크아웃
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      # 1-2. Node.js 환경 설정
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # 프로젝트에 맞는 Node.js 버전을 지정합니다.
+
+      # 1-3. 의존성 설치
+      - name: Install dependencies
+        run: npm ci
+
+      # 1-4. 프로젝트 빌드
+      - name: Build with npm
+        run: npm run build
+
+      # 1-5. 빌드 결과물(artifact) 업로드
+      # 'deploy' 작업에서 이 빌드 결과물을 다운로드하여 사용합니다.
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-files # 아티팩트 이름
+          path: ./build    # 빌드 결과물이 있는 폴더 경로 (예: React는 ./build, Vue는 ./dist)
+
+  # ===================================================================
+  # 2. S3 및 CloudFront에 배포하는 작업
+  # - 백엔드의 'deploy' 작업에 해당합니다.
+  # ===================================================================
+  deploy:
+    needs: build # 'build' 작업이 성공해야만 실행됩니다.
+    runs-on: ubuntu-latest
+    steps:
+      # 2-1. 'build' 작업에서 업로드한 빌드 결과물(artifact) 다운로드
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files # 'build' 작업에서 지정한 아티팩트 이름
+          path: ./build    # 다운로드 받을 경로
+
+      # 2-2. AWS 인증 정보 설정 (GitHub Secrets 사용)
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: ap-northeast-2 # S3 버킷이 있는 리전
+
+      # 2-3. S3 버킷에 빌드 파일 업로드
+      - name: Upload to S3
+        run: aws s3 sync ./build s3://여기에-S3-버킷이름을-입력하세요 --delete
+
+      # 2-4. CloudFront 캐시 무효화
+      - name: Invalidate CloudFront Cache
+        run: aws cloudfront create-invalidation --distribution-id 여기에-CloudFront-ID를-입력하세요 --paths "/*"
