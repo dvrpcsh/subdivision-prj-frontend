@@ -59,10 +59,23 @@ const PotEditPage = () => {
     // 폼 입력값이 변경될 때 potData state를 업데이트하는 핸들러
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setPotData(prevData => ({
-            ...prevData,
-            [name]: value
-        }));
+
+        // 'price' 또는 'maximumHeadcount' 필드의 경우 숫자만 허용하도록 처리합니다.
+        if (name === 'price' || name === 'maximumHeadcount') {
+            // 정규식을 사용하여 숫자 이외의 문자를 모두 제거합니다.
+            // 이렇게 하면 사용자가 키보드로 숫자 외의 값을 입력해도 화면에는 숫자만 남게 됩니다.
+            const numericValue = value.replace(/[^0-9]/g, '');
+            setPotData(prevData => ({
+                ...prevData,
+                [name]: numericValue
+            }));
+        } else {
+            // 다른 필드들은 기존 방식대로 값을 업데이트합니다.
+            setPotData(prevData => ({
+                ...prevData,
+                [name]: value
+            }));
+        }
     };
 
     // 이미지 변경 핸들러
@@ -162,7 +175,17 @@ const PotEditPage = () => {
                 <div className="form-group price-section">
                     <div className="price-input">
                         <label htmlFor="price">총 가격</label>
-                        <input id="price" name="price" type="number" value={potData.price} onChange={handleChange} placeholder="총액(원)" required />
+                        <input
+                            id="price"
+                            name="price"
+                            type="text"
+                            pattern="[0-9]*"
+                            inputMode="numeric"
+                            value={potData.price}
+                            onChange={handleChange}
+                            placeholder="총액(원)"
+                            required
+                        />
                     </div>
                     <div className="headcount-input">
                         <label htmlFor="maximumHeadcount">최대 인원</label>
