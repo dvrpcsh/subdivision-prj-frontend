@@ -205,7 +205,16 @@ const PotCreatePage = () => {
                 <div className="form-group price-section">
                     <div className="price-input">
                         <label htmlFor="price">총 가격</label>
-                        <input id="price" type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="총액(원)" required />
+                        <input
+                            id="price"
+                            type="text"
+                            pattern="[0-9]*"
+                            inputMode="numeric"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value.replace(/[^0-9]/g, ''))}
+                            placeholder="총액(원)"
+                            required
+                        />
                     </div>
                     <div className="headcount-input">
                         <label htmlFor="maximumHeadcount">최대 참여 인원</label>
