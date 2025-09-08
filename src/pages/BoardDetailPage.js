@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import api from '../api'; // API 모듈 import
-import styles from './BoardDetailPage.module.css';
+import api from '../api';
+import styles from './BoardDetail.module.css';
 
 const BoardDetailPage = () => {
     const { id } = useParams();
@@ -20,7 +20,6 @@ const BoardDetailPage = () => {
             setLoading(true);
             setError(null);
             try {
-                // Promise.all을 사용하여 게시글과 댓글을 병렬로 요청합니다.
                 const [postRes, commentsRes] = await Promise.all([
                     api.get(`/api/board/${id}`),
                     api.get(`/api/board/${id}/comments`)
@@ -62,6 +61,25 @@ const BoardDetailPage = () => {
             } catch (err) {
                 console.error("게시글 삭제 실패:", err);
                 alert(err.response?.data?.message || "게시글 삭제에 실패했습니다.");
+            }
+        }
+    };
+
+    /**
+     * 댓글 삭제 함수
+     * @param {number} commentId - 삭제할 댓글의 ID
+     */
+    const handleCommentDelete = async (commentId) => {
+        if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+            try {
+                // DELETE /api/comments/{commentId} API 호출
+                await api.delete(`/api/comments/${commentId}`);
+                // 성공 시, UI에서 해당 댓글을 즉시 제거
+                setComments(comments.filter(comment => comment.id !== commentId));
+                alert("댓글이 삭제되었습니다.");
+            } catch (err) {
+                console.error("댓글 삭제 실패:", err);
+                alert(err.response?.data?.message || "댓글 삭제에 실패했습니다.");
             }
         }
     };
@@ -110,7 +128,18 @@ const BoardDetailPage = () => {
                             <div key={comment.id} className={styles.commentItem}>
                                 <div className={styles.commentMeta}>
                                     <span className={styles.commentAuthor}>{comment.author}</span>
-                                    <span className={styles.commentDate}>{comment.date}</span>
+                                    <div className={styles.commentMetaRight}>
+                                        <span className={styles.commentDate}>{comment.date}</span>
+                                        {/* 현재 유저와 댓글 작성자가 같으면 삭제 버튼 표시 */}
+                                        {currentUser?.nickname === comment.author && (
+                                            <button
+                                                onClick={() => handleCommentDelete(comment.id)}
+                                                className={styles.commentDeleteButton}
+                                            >
+                                                삭제
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                                 <p className={styles.commentContent}>{comment.content}</p>
                             </div>
@@ -125,3 +154,4 @@ const BoardDetailPage = () => {
 };
 
 export default BoardDetailPage;
+
