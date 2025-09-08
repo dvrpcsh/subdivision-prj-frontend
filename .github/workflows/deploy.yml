@@ -40,7 +40,7 @@ jobs:
 
       # 1-5. 프로젝트 빌드
       - name: Build with npm
-        run: cross-env NODE_ENV=production CI=false npm run build
+        run: npm run build
 
       # 1-6. 빌드 결과물(artifact) 업로드
       # 'deploy' 작업에서 이 빌드 결과물을 다운로드하여 사용합니다.
