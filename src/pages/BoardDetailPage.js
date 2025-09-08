@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import api from '../api'; // API 모듈 import
-import styles from './BoardDetail.module.css';
+import styles from './BoardDetailPage.module.css';
 
 const BoardDetailPage = () => {
     const { id } = useParams();
