@@ -1,23 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../api'; // API 모듈 import
 import styles from './BoardPage.module.css';
 
-// 게시판 초기 더미 데이터
-const initialPosts = [
-    { id: 1, title: '첫 번째 게시글입니다.', author: '관리자', date: '2025-09-08' },
-    { id: 2, title: '자유게시판에 오신 것을 환영합니다!', author: '운영자', date: '2025-09-08' },
-    { id: 3, title: '이곳에 자유롭게 글을 작성해주세요.', author: '홍길동', date: '2025-09-07' },
-];
+const BoardPage = () => {
+    const [posts, setPosts] = useState([]);
+    // 로딩 및 에러 상태 추가
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-const Board = () => {
-    // 게시글 목록 상태를 관리합니다.
-    const [posts, setPosts] = useState(initialPosts);
+    // 컴포넌트가 마운트될 때 API를 호출하여 게시글 목록을 가져옵니다.
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                setLoading(true);
+                setError(null);
+                // GET /api/board API 호출 (페이징이 적용된 경우, params로 page 정보를 넘길 수 있습니다)
+                const response = await api.get('/api/board');
+                setPosts(response.data.content); // Page 객체에서 실제 목록은 content에 있습니다.
+            } catch (err) {
+                console.error("게시글 목록 조회 실패:", err);
+                setError("게시글 목록을 불러오는 데 실패했습니다.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPosts();
+    }, []); // 빈 배열을 전달하여 한 번만 실행되도록 합니다.
+
+    if (loading) return <div className={styles.boardContainer}><h2>로딩 중...</h2></div>;
+    if (error) return <div className={styles.boardContainer}><h2>오류: {error}</h2></div>;
 
     return (
         <div className={styles.boardContainer}>
             <div className={styles.boardHeader}>
                 <h1>자유게시판</h1>
-                {/* '/board/new' 경로로 이동하는 글쓰기 버튼입니다. */}
                 <Link to="/board/new" className={styles.writeButton}>
                     글쓰기
                 </Link>
@@ -32,24 +50,28 @@ const Board = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {/* posts 배열을 순회하며 각 게시글을 테이블 행으로 렌더링합니다. */}
-                    {posts.map(post => (
-                        <tr key={post.id}>
-                            <td>{post.id}</td>
-                            <td className={styles.tdTitle}>
-                                {/* 각 게시글의 상세 페이지로 이동하는 링크입니다. */}
-                                <Link to={`/board/${post.id}`} className={styles.postLink}>
-                                    {post.title}
-                                </Link>
-                            </td>
-                            <td>{post.author}</td>
-                            <td>{post.date}</td>
+                    {posts.length > 0 ? (
+                        posts.map(post => (
+                            <tr key={post.id}>
+                                <td>{post.id}</td>
+                                <td className={styles.tdTitle}>
+                                    <Link to={`/board/${post.id}`} className={styles.postLink}>
+                                        {post.title}
+                                    </Link>
+                                </td>
+                                <td>{post.author}</td>
+                                <td>{post.date}</td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4">게시글이 없습니다.</td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </table>
         </div>
     );
 };
 
-export default Board;
+export default BoardPage;

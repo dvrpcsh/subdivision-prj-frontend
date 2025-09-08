@@ -38,7 +38,7 @@ function App() {
                     <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
                     <Route path="/create-pot" element={<PrivateRoute><PotCreatePage /></PrivateRoute>} />
                     <Route path="/pots/:potId/edit" element={<PrivateRoute><PotEditPage /></PrivateRoute>} />
-                    <Route path="/BoardPage" element={<PrivateRoute><BoardPage /></PrivateRoute>} />
+                    <Route path="/board" element={<PrivateRoute><BoardPage /></PrivateRoute>} />
                     <Route path="/board/new" element={<PrivateRoute><BoardWritePage /></PrivateRoute>} />
                     <Route path="/board/:id" element={<PrivateRoute><BoardDetailPage /></PrivateRoute>} />
                     <Route path="/board/:id/edit" element={<PrivateRoute><BoardEditPage /></PrivateRoute>} />

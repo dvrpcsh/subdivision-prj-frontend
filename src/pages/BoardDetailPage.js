@@ -1,39 +1,76 @@
-import React from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import styles from './BoardDetailPage.module.css';
+import { AuthContext } from '../context/AuthContext';
+import api from '../api'; // API 모듈 import
+import styles from './BoardDetail.module.css';
 
-// TODO: 추후 서버에서 받아올 실제 데이터로 교체해야 합니다.
-// 현재는 Board.js와 동일한 임시 데이터를 사용합니다.
-const initialPosts = [
-    { id: 1, title: '첫 번째 게시글입니다.', author: '김유저', date: '2024-01-01', content: '이것은 첫 번째 게시글의 상세 내용입니다. \n\n자유롭게 내용을 작성해주세요.' },
-    { id: 2, title: '두 번째 게시글입니다.', author: '이유저', date: '2024-01-02', content: '두 번째 글의 내용입니다. \n\nReact Router를 사용하여 페이지를 만들고 있습니다.' },
-    { id: 3, title: '세 번째 게시글입니다.', author: '박유저', date: '2024-01-03', content: '마지막 임시 게시글입니다. \n\n실제로는 서버 API를 호출하여 데이터를 가져와야 합니다.' },
-];
-
-const BoardDetail = () => {
-    // URL 파라미터에서 게시글의 id를 가져옵니다. (예: /board/1 -> id는 '1')
+const BoardDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    // id에 해당하는 게시글을 임시 데이터에서 찾습니다.
-    const post = initialPosts.find(p => p.id === parseInt(id));
+    const { currentUser } = useContext(AuthContext);
 
-    /**
-     * '삭제' 버튼 클릭 시 실행될 함수입니다.
-     */
-    const handleDelete = () => {
-        if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
-            // TODO: 실제 서버에 삭제 요청을 보내는 API 호출 로직을 추가해야 합니다.
-            console.log(`게시글 ${id} 삭제 요청`);
-            alert('게시글이 삭제되었습니다.');
-            // 삭제 후에는 게시판 목록으로 이동합니다.
-            navigate('/board');
+    const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([]);
+    const [newComment, setNewComment] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchPostAndComments = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                // Promise.all을 사용하여 게시글과 댓글을 병렬로 요청합니다.
+                const [postRes, commentsRes] = await Promise.all([
+                    api.get(`/api/board/${id}`),
+                    api.get(`/api/board/${id}/comments`)
+                ]);
+                setPost(postRes.data);
+                setComments(commentsRes.data);
+            } catch (err) {
+                console.error("데이터 조회 실패:", err);
+                setError("게시글을 불러오는 데 실패했습니다.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchPostAndComments();
+    }, [id]);
+
+    const handleCommentSubmit = async (e) => {
+        e.preventDefault();
+        if (!newComment.trim()) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+        try {
+            const response = await api.post(`/api/board/${id}/comments`, { content: newComment });
+            setComments([...comments, response.data]);
+            setNewComment('');
+        } catch (err) {
+            console.error("댓글 작성 실패:", err);
+            alert(err.response?.data?.message || "댓글 작성에 실패했습니다.");
         }
     };
 
-    // id에 해당하는 게시글이 없을 경우 메시지를 표시합니다.
-    if (!post) {
-        return <div className={styles.container}>게시글을 찾을 수 없습니다.</div>;
-    }
+    const handleDelete = async () => {
+        if (window.confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+            try {
+                await api.delete(`/api/board/${id}`);
+                alert('게시글이 삭제되었습니다.');
+                navigate('/board');
+            } catch (err) {
+                console.error("게시글 삭제 실패:", err);
+                alert(err.response?.data?.message || "게시글 삭제에 실패했습니다.");
+            }
+        }
+    };
+
+    if (loading) return <div className={styles.container}>로딩 중...</div>;
+    if (error) return <div className={styles.container}><p>오류: {error}</p></div>;
+    if (!post) return <div className={styles.container}>게시글을 찾을 수 없습니다.</div>;
+
+    const isAuthor = currentUser?.nickname === post.author;
 
     return (
         <div className={styles.container}>
@@ -44,18 +81,47 @@ const BoardDetail = () => {
                     <span>작성일: {post.date}</span>
                 </div>
             </div>
-            {/* white-space: pre-wrap; 스타일을 통해 \n(줄바꿈) 문자를 그대로 렌더링합니다. */}
-            <div className={styles.postContent}>
-                {post.content}
-            </div>
+            <div className={styles.postContent}>{post.content}</div>
             <div className={styles.buttonContainer}>
-                {/* TODO: 추후 현재 로그인한 사용자가 작성자일 경우에만 보이도록 로직을 추가해야 합니다. */}
-                <button className={styles.editButton}>수정</button>
-                <button onClick={handleDelete} className={styles.deleteButton}>삭제</button>
+                {isAuthor && (
+                    <>
+                        <Link to={`/board/${id}/edit`} className={styles.editButton}>수정</Link>
+                        <button onClick={handleDelete} className={styles.deleteButton}>삭제</button>
+                    </>
+                )}
                 <Link to="/board" className={styles.listButton}>목록</Link>
+            </div>
+            <div className={styles.commentsSection}>
+                <h2 className={styles.commentsTitle}>댓글 ({comments.length})</h2>
+                <form onSubmit={handleCommentSubmit} className={styles.commentForm}>
+                    <textarea
+                        className={styles.commentTextarea}
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder={currentUser ? "댓글을 입력하세요..." : "로그인 후 댓글을 작성할 수 있습니다."}
+                        rows="3"
+                        disabled={!currentUser}
+                    />
+                    <button type="submit" className={styles.commentSubmitButton} disabled={!currentUser}>등록</button>
+                </form>
+                <div className={styles.commentList}>
+                    {comments.length > 0 ? (
+                        comments.map(comment => (
+                            <div key={comment.id} className={styles.commentItem}>
+                                <div className={styles.commentMeta}>
+                                    <span className={styles.commentAuthor}>{comment.author}</span>
+                                    <span className={styles.commentDate}>{comment.date}</span>
+                                </div>
+                                <p className={styles.commentContent}>{comment.content}</p>
+                            </div>
+                        ))
+                    ) : (
+                        <p className={styles.noComments}>아직 댓글이 없습니다.</p>
+                    )}
+                </div>
             </div>
         </div>
     );
 };
 
-export default BoardDetail;
+export default BoardDetailPage;

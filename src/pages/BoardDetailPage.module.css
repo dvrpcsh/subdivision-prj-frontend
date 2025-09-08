@@ -1,91 +1,158 @@
-/* 전체 상세 페이지 컨테이너 */
+/* 기존 스타일은 여기에 그대로 있다고 가정합니다. */
 .container {
-    width: 100%;
-    max-width: 900px;
-    margin: 40px auto;
-    padding: 30px 40px;
-    font-family: 'Noto Sans KR', sans-serif;
-    border-radius: 10px;
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
     background-color: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* 게시글 헤더 (제목, 메타 정보) */
 .postHeader {
-    border-bottom: 2px solid #eee;
-    padding-bottom: 20px;
-    margin-bottom: 30px;
+    border-bottom: 1px solid #e9ecef;
+    padding-bottom: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .postTitle {
-    font-size: 32px;
-    color: #222;
-    margin-bottom: 15px;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: #212529;
 }
 
 .postMeta {
     display: flex;
-    gap: 20px;
-    font-size: 15px;
-    color: #888;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #868e96;
 }
 
-/* 게시글 본문 */
 .postContent {
-    font-size: 16px;
+    font-size: 1.1rem;
     line-height: 1.8;
-    color: #444;
-    min-height: 300px; /* 내용이 적어도 최소 높이를 유지 */
-    white-space: pre-wrap; /* \n과 같은 공백 문자를 그대로 표시 */
+    color: #495057;
+    white-space: pre-wrap; /* \n(줄바꿈) 문자를 렌더링하기 위해 필수 */
+    min-height: 200px;
 }
 
-/* 버튼 컨테이너 */
 .buttonContainer {
+    margin-top: 2rem;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
+    gap: 0.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
 }
 
-/* 버튼 공통 스타일 */
-.editButton, .deleteButton, .listButton {
-    padding: 10px 25px;
-    font-size: 16px;
-    font-weight: bold;
+.listButton, .editButton, .deleteButton {
+    padding: 0.6rem 1.2rem;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
-    text-decoration: none; /* Link 태그의 밑줄 제거 */
+    text-decoration: none;
     display: inline-block;
     text-align: center;
-    transition: all 0.2s;
 }
 
-/* 수정 버튼 */
+.listButton {
+    background-color: #495057;
+    color: white;
+}
+
 .editButton {
     background-color: #17a2b8;
     color: white;
 }
-.editButton:hover {
-    background-color: #138496;
-}
 
-/* 삭제 버튼 */
 .deleteButton {
     background-color: #dc3545;
     color: white;
 }
-.deleteButton:hover {
-    background-color: #c82333;
+
+
+/* --- 💡 댓글 섹션 스타일 추가 --- */
+.commentsSection {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #dee2e6;
 }
 
-/* 목록 버튼 */
-.listButton {
-    background-color: #6c757d;
+.commentsTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: #343a40;
+}
+
+.commentForm {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.commentTextarea {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 1rem;
+    resize: vertical;
+}
+
+.commentSubmitButton {
+    align-self: flex-end;
+    padding: 0.6rem 1.5rem;
+    background-color: #007bff;
     color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
 }
-.listButton:hover {
-    background-color: #5a6268;
+
+.commentList {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
+
+.commentItem {
+    padding: 1.2rem;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    border: 1px solid #e9ecef;
+}
+
+.commentMeta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    font-size: 0.9rem;
+}
+
+.commentAuthor {
+    font-weight: 600;
+    color: #495057;
+}
+
+.commentDate {
+    color: #868e96;
+}
+
+.commentContent {
+    font-size: 1rem;
+    color: #343a40;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.noComments {
+    text-align: center;
+    color: #868e96;
+    padding: 2rem;
+}
+
