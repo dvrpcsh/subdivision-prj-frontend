@@ -1,0 +1,90 @@
+/* 전체 게시판 컨테이너 스타일 */
+.boardContainer {
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 20px;
+    font-family: 'Noto Sans KR', sans-serif;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* 게시판 헤더 (제목 + 글쓰기 버튼) */
+.boardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #eee;
+}
+
+.boardHeader h1 {
+    font-size: 28px;
+    color: #333;
+    margin: 0;
+}
+
+/* 글쓰기 버튼 스타일 */
+.writeButton {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.writeButton:hover {
+    background-color: #0056b3;
+}
+
+/* 게시글 테이블 스타일 */
+.postsTable {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+}
+
+.postsTable th, .postsTable td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #ddd;
+}
+
+.postsTable th {
+    background-color: #f2f2f2;
+    color: #555;
+    font-weight: bold;
+}
+
+/* 각 컬럼 너비 지정 */
+.thNo { width: 10%; }
+.thTitle { width: 50%; }
+.thAuthor { width: 20%; }
+.thDate { width: 20%; }
+
+/* 제목 컬럼만 좌측 정렬 */
+.tdTitle {
+    text-align: left;
+}
+
+/* 게시글 제목 링크 스타일 */
+.postLink {
+    color: #333;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.postLink:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+/* 테이블 행 호버 효과 */
+.postsTable tbody tr:hover {
+    background-color: #f5f5f5;
+}

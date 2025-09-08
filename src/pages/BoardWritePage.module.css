@@ -1,0 +1,105 @@
+/* 전체 글쓰기 폼 컨테이너 */
+.writeContainer {
+    width: 100%;
+    max-width: 900px;
+    margin: 40px auto;
+    padding: 30px;
+    font-family: 'Noto Sans KR', sans-serif;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.writeContainer h1 {
+    font-size: 28px;
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* 폼 스타일 */
+.writeForm {
+    display: flex;
+    flex-direction: column;
+}
+
+/* 폼 그룹 (라벨 + 입력 필드) */
+.formGroup {
+    margin-bottom: 25px;
+}
+
+.formGroup label {
+    display: block;
+    font-size: 16px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+/* 제목 입력 필드 */
+.inputTitle {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.2s;
+}
+
+/* 내용 입력 필드 */
+.textareaContent {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-family: 'Noto Sans KR', sans-serif;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    resize: vertical; /* 수직으로만 크기 조절 가능 */
+    transition: border-color 0.2s;
+}
+
+.inputTitle:focus,
+.textareaContent:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+}
+
+/* 버튼 컨테이너 */
+.buttonContainer {
+    display: flex;
+    justify-content: flex-end; /* 버튼을 오른쪽으로 정렬 */
+    gap: 10px; /* 버튼 사이 간격 */
+    margin-top: 10px;
+}
+
+/* 등록, 취소 버튼 공통 스타일 */
+.submitButton, .cancelButton {
+    padding: 10px 25px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+/* 등록 버튼 */
+.submitButton {
+    background-color: #007bff;
+    color: white;
+}
+
+.submitButton:hover {
+    background-color: #0056b3;
+}
+
+/* 취소 버튼 */
+.cancelButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancelButton:hover {
+    background-color: #5a6268;
+}
