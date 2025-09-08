@@ -16,6 +16,19 @@ const Header = () => {
         navigate('/');
     }
 
+    const handleBoardClick = (e) => {
+        // 현재 로그인한 유저가 없으면 (로그아웃 상태이면)
+        // 로그인 상태라면, 이 함수는 아무것도 하지 않고 Link의 기본 동작(to="/board"로 이동)이 실행됩니다.
+        if (!currentUser) {
+            // Link 태그의 기본 동작(페이지 이동)을 먼저 막습니다.
+            e.preventDefault();
+            // 사용자에게 알림을 표시합니다.
+            alert('로그인이 필요한 메뉴입니다.');
+            // 로그인 페이지로 이동시킵니다.
+            navigate('/login');
+        }
+    };
+
     // 로고 클릭 시 이동할 경로를 로그인 상태에 따라 결정
     const logoPath = currentUser ? '/map' : '/home';
 
@@ -25,6 +38,8 @@ const Header = () => {
                 우리동네 공동구매 플랫폼
             </Link>
             <nav className={styles.nav}>
+                {/* 자유게시판 이동 */}
+                <Link to="/board" onClick={handleBoardClick} className={styles.navLink}>자유게시판</Link>
                 {/* currentUser의 존재 여부로 로그인 상태를 판단합니다. */}
                 {currentUser ? (
                     <>
